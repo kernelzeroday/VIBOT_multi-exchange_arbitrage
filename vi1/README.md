@@ -16,3 +16,8 @@ exchanges: which exchanges to use
 currency: currency pairs to trade
 
 
+To start the Order Engine:
+
+    cd order_engine
+    ./Trade.py
+
