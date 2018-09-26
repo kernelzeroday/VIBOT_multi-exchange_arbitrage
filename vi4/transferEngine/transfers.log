@@ -1,0 +1,47 @@
+INFO:[*] Transfer Engine awaiting orders.
+INFO:Action: transfer , Currency: BTC, Amount: 1, From: cex, To: poloniex 
+INFO:Program exit
+INFO:[*] Transfer Engine awaiting orders.
+INFO:Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:Program exit
+INFO:[*] Transfer Engine awaiting orders.
+INFO:[*] Transfer Engine awaiting orders.
+INFO:[!] Invalid Json Format.
+INFO:[*] Transfer Engine awaiting orders.
+INFO:[!] Invalid Json Format.
+INFO:[*] Transfer Engine awaiting orders.
+INFO:[!] Invalid Json Format.
+INFO:[*] Transfer Engine awaiting orders.
+INFO:Action: check , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:[*] Transfer Engine check requested, I am running!
+INFO:Action check: not implemented
+INFO:Action: check , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:[*] Transfer Engine check requested, I am running!
+INFO:Action check: not implemented
+INFO:Action: check , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:[*] Transfer Engine check requested, I am running!
+INFO:Action check: not implemented
+INFO:Action: check , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:[*] Transfer Engine check requested, I am running!
+INFO:Action check: not implemented
+INFO:Program exit
+INFO:[*] Transfer Engine awaiting orders.
+INFO:Action: tramsfer , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo 
+INFO:Program exit
+INFO:{"TRANSER":"[*] Transfer Engine awaiting orders."}
+INFO:{"TRANSER":"Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo "}
+INFO:{"TRANSER":"Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo "}
+INFO:{"TRANSER":"Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo "}
+INFO:{"TRANSER":"Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo "}
+INFO:Program exit
+INFO:{"TRANSER":"[*] Transfer Engine awaiting orders."}
+INFO:{"TRANSER":"Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo "}
+INFO:{"TRANSER":"Action: transfer , Currency: BTC, Amount: 1, From: cex, To: polo "}
+INFO:Program exit
+INFO:{"TRANSER":"[*] Transfer Engine awaiting orders."}
+INFO:Program exit
+INFO:{"TRANSER":"[*] Transfer Engine awaiting orders."}
+INFO:Program exit
+INFO:{"TRANSER":"[*] Transfer Engine awaiting orders."}
