@@ -1,0 +1,5 @@
+poloniexkey = 'BWFCABK6-ECLSEMKQ-L0676MQE-X2APSDEU'
+poloniexsecret = '0f6d10ec2dd531afb6fcee689fe42f1c7751a1d5ab27fad6f5c476132d27dd4f543bdc9d1ea46c44643ba84f37c08a02e9405eb4afc81ccec6d7e8487e240cde'
+cexiousername = 'up109970818'
+cexiokey = 'CSJGbp4Vwpd76CpD9jbagOSsDs'
+cexiosecret = 'myg4HeosB3zRPOsYS4nZAWUWOTg'
