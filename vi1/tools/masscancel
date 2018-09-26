@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Multi-Exchange Mass Order Cancel Wrapper
+# Darkerego 2018 & Devteam6
+
+
+verbose(){
+return 1
+}
+
+cancel(){
+
+    verbose && echo "Cancel function intitiated..."
+
+    cancel_cex(){
+    verbose && echo 'Canceling all orders on cex...'
+    for i in $(./cextool -O |jq -r ".[].id"); do ./cextool -C -i $i ;done
+    }
+
+
+    cancel_polo(){
+    verbose && echo 'Canceling all orders on polo...'
+    for i in `./polotool -o|jq ."$sym"|grep orderNumber | tr '"orderNumber": ' ' ' |tr ' ,' ' '`; do ./polotool -C -i $i ;done
+    }
+
+    cancel_bittrex(){
+    verbose && echo 'Canceling all orders on bittrex...'
+    #for i in $(./bittrextool -O|jq -r .[]|grep OrderUuid|sed 's/"OrderUuid": "//'|tr '\",' ' ') ; do ./bittrextool -C -i $i; done
+    for i in $(./bittrextool -O|jq -r . |grep -v "BTC-ADA\|USDT-BTC\|USDT-ADA\|USDT\|ADA"|grep OrderUuid|sed 's/"OrderUuid": "//'|tr '\",' ' ') ; do ./bittrextool -C -i $i; done
+    }
+
+case "$ex" in
+bittrex)
+cancel_bittrex
+;;
+
+poloniex)
+cancel_polo
+;;
+
+cex)
+cancel_cex
+;;
+
+esac
+
+}
+
+
+case "$1" in
+-e|--exchange)
+ex="$2"
+sym="$4"
+
+[[ -z "$ex" ]] && { echo 'Please specifiy an exchange <-e>'; exit 1 ; }
+[[ -n "$sym" ]] && echo 'Notice: Bittrex will just cancel *everything*. Poloniex will cancel specified symbol.'
+
+read -p "Press any key to cancel all $sym orders on $ex ... "
+cancel "$ex" "$sym"
+;;
+-h|--help)
+echo "Usage: $0 -e <exchange>  -p <market> "
+echo "  example: Cancel all STR orders on poloniex:"
+echo "$0 -e poloniex -p BTC_STR "
+echo " Exchanges: cex, poloniex, bittrex "
+exit 0
+
+;;
+*)
+echo 'Invalid option, run --help for usage'
+exit 1
+;;
+
+esac
+
+exit

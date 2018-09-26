@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+import argparse,sys,os,smtplib
+sender = ""
+recv = ""
+sub = ""
+server = "" 
+email_login = "vibot@rebgloex.com"
+email_passwd = "!7qQ&6V>"
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+def send_Mail(sender, recv, subject, server):
+    me = sender
+    # dirty wtf hack
+    you = recv
+    #you = "xelectron@protonmail.com,admin@rebgloex.com,johnballard91@gmail.com"
+    sub = subject
+    smtp_server = server
+
+    # Create message container - the correct MIME type is multipart/alternative.
+    msg = MIMEMultipart
+    msg = MIMEText(message)
+    msg['Subject'] = sub
+    msg['From'] = me
+    msg['To'] = you
+
+    #msg.add_header('Content-Type','text/html')
+    msg.set_payload(message)
+    print('######## Preview of Your Message: ########')
+    print(msg.as_string())
+    print('######## ------- End Message ----- ########')
+    text = msg.as_string()
+    s = smtplib.SMTP(smtp_server, 587)
+    s.starttls()
+    s.login(email_login, email_passwd)
+    s.sendmail(me, you.split(","), text)
+    s.quit()
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-f','--send',default='vibot@rebgloex.com', help='Sender of this message.')
+parser.add_argument('-r','--recv',default='xelectron@protonmail.com,admin@rebgloex.com,johnballard91@gmail.com,guti.0724@gmail.com,exc.aloha@gmail.com', help='Recipitent of this message.')
+parser.add_argument('-m','--message',default='message.txt', help='File containing message content to send.')
+parser.add_argument('-S','--subject',default='Vibot Balance Report', help='Subject of email to send.')
+parser.add_argument('-s','--server',default='smtp.gmail.com', help='Hostname or ip of the smtp server to use.')
+
+ns = parser.parse_args()
+
+send = ns.send if ns.send is not None else "default_sender"
+recv = ns.recv if ns.recv is not None else "default_recv"
+message = ns.message if ns.message is not None else "default_message"
+subject = ns.subject if ns.subject is not None else "defaut_subject"
+server = ns.server if ns.server is not None else "default_server"
+
+try:
+    print("Sender: %s" % send)
+    print("Recipitent: %s" % recv)
+    print("Subject: %s" % subject)
+    print("Server: %s" % server)
+except Exception as e:
+    print(e)
+
+try:
+    f = open(message, 'r')
+except IOError:
+    print ("[!] Cannot open %s, does it exist?" % message)
+    sys.exit(1)
+else:
+    #line = f.readline()
+    message=[]
+    #while line:
+    #    message.append(line)
+    message=f.read()
+    print("Message:\n-----------------\n%s\n---------------" % message)
+    try:
+        send_Mail(sender, recv, subject, server)
+    except Exception as x:
+        print(x)
+    f.close()
+

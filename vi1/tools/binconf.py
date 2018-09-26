@@ -1,0 +1,9 @@
+
+#api_key = "XWpNollzAmhrN5lNyLSNJn7F9nvMWSegnRiF2LhdIkvxUy60sDDU70yRE4fmTLL5"
+#api_secret = "eHBXJ3MIrRNe0vfUv19bI6wX4JEiLbzSP1jOKGC14mZtHFCYfxSeHafaMew3io4T"
+# chevs acct - caution plz
+
+#api_key = "mL3F5TyMgF4FU5oyPLdSr8XJuLMYV65JKlb5Z6bvbRa9TWE2eS384wxJVE8Z7qAC"
+#api_secret = "9WeclpyCNvm15alTLtRe7u1FQEhqhLs3akRm0nSHuotnuYbuBuxeh3GjjVrJCidb"
+api_key = 'vURW3wM0yC7vD4RwAZIEFbMsDND5SIXIj0lGWhcv4RlNVlXtk0EVV3bSq9xrC8Jh'
+api_secret = 'r0XkzQBMC6xHXTz7IE9DF9yHmwqWBsuul3lJlX6TfT8YCqqYViItBSdtEkBdZ539'
