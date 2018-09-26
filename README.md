@@ -5,6 +5,11 @@ multiple currency exchanges, searching for price spreads. When a spreads is dete
 order for same quantity on the higher priced exchanged. This is a form of inter-exchange arbitrage, utilizing a method that eliminates the need for 
 transactions, allowing spreads to be quickly closed without waiting for transactions from one exchange to another.
 
+# NOTICE - 9/26/18:
+
+**This repository contains all of the most recent code. Please note that currently, the installation script requires that each server's contents are hosted on a seperate repository.
+TODO: Modify installation script to use one unified repository. Also note that the documentation needs to be updated at some point but still is very thorough and sufficient for the time being.**
+
 
 Vibot consists of multiple components working together via the message queue interface provided by mosquito.
 
