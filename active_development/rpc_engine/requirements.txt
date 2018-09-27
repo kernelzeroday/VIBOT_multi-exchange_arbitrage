@@ -1,2 +1,9 @@
+#Json RPC 
+jsonrpc2_zeromq
+
+#PyRO python remote object direct calls
+
+Pyro4
+
 #pyRpc is only for 2.7
 #pyRpc
