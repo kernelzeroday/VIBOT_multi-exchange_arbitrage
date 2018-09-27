@@ -4,7 +4,9 @@ xmlrpc  --  native xml python rpc implementation
 PROS: native, highly configurable
 CONS: xml, perhaps too complex for our purposes
 
-
+json-rpc  --  Json rpc over http
+PROS: universal interop
+CONS: complexity of function declaration
 
 
 

@@ -1,10 +1,25 @@
-from jsonrpc2_zeromq import RPCServer
+from werkzeug.wrappers import Request, Response
+from werkzeug.serving import run_simple
 
-class EchoServer(RPCServer):
+from jsonrpc import JSONRPCResponseManager, dispatcher
 
-    def handle_echo_method(self, msg):
-        return msg
 
-s = EchoServer("tcp://127.0.0.1:57570")
-s.run()
+@dispatcher.add_method
+def foobar(**kwargs):
+    return kwargs["foo"] + kwargs["bar"]
+
+
+@Request.application
+def application(request):
+    # Dispatcher is dictionary {<method_name>: callable}
+    dispatcher["echo"] = lambda s: s
+    dispatcher["add"] = lambda a, b: a + b
+
+    response = JSONRPCResponseManager.handle(
+        request.data, dispatcher)
+    return Response(response.json, mimetype='application/json')
+
+
+if __name__ == '__main__':
+    run_simple('localhost', 4000, application)
 
