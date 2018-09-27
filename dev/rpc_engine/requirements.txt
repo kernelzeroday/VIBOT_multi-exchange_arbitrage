@@ -1,6 +1,11 @@
 #Json RPC 
 jsonrpc2_zeromq
 
+python-jsonrpc
+
+json-rpc
+
+
 #PyRO python remote object direct calls
 
 Pyro4
