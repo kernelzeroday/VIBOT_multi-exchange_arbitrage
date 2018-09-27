@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Form</title>
+        {% load staticfiles %}
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/materialize.min.css' %}">
+</head>
+<body>
+    <div class="form-wrapper z-depth-5">
+        <div class="row">
+            <h2 class="form__title blue-text center-align">VI<span class="black-text">BOT</span></h2>
+            <h5 class="form__subtitle center-align">Log
+                <span class="blue-text">in</span>
+            </h5>
+            <form class="col s12" role="form" action="{% url 'account_app:login' %}" method="post"
+                              enctype="multipart/form-data">
+                                            {% csrf_token %}
+                <div class="row">
+                    <div class="input-field col s12">
+                        <i class="material-icons prefix">people</i>
+                        <input id="id_username" maxlength="30" name="username" type="text" class="validate">
+                        <label for="id_username">UserName</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <i class="material-icons prefix">lock_open</i>
+                        <input id="id_password" maxlength="30" name="password" type="password" class="validate">
+                        <label for="id_password">Password</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col s12 center-align">
+                        <button class="btn  blue white-text waves-effect waves-light" type="submit" name="action">Submit
+                            <i class="material-icons right">send</i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="{% static 'js/materialize.min.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+.vibot-nav {
+    padding: 0 40px;
+}
+nav ul a:hover {
+    background-color: rgba(75, 70, 70, 0.94)!important;
+}
