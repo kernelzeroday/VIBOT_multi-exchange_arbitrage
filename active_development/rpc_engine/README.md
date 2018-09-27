@@ -8,4 +8,6 @@ PyRO4  --  python remote objects system
 PROS: high configurability, ease of use
 CONS: python only, no cross language use
 
-
+jsonrpc2_zeromq --  json rpc over zeromq
+PROS: universal interop with excellent transport over zmq
+CONS: tbd
