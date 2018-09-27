@@ -1,3 +1,8 @@
+Current Favored Approach: JSON RPC over HTML for easiest compatability of interfaces
+
+
+
+
 Possible candidates for RPC control:
 
 xmlrpc  --  native xml python rpc implementation
