@@ -1,4 +1,12 @@
 #!/usr/bin/env python3.6
+# Auto Balance Exchange Wallets
+""" 
+This Program is intended to purchase asset if needed
+when the market spread is as close to zero as possible.
+Than we can arbitrage the asset later. This method has
+the advantage of avoiding transactions between exchanges.
+"""
+
 import json
 import ccxt
 import math
@@ -401,11 +409,20 @@ def calcSpreads(currency):
     cr = len(clist)
     #print(cr)
     average = sum(clist) / int(cr)
-    print('Average: '+str(average))
+    return(average)
 
-
+#TODO: Implement hedge calculation,
+# Then implement balance logic; If the averager is 
+# less than (example, TBD) 1.0001, then
+# Check balance of each exchange's wallet. 
+# If the wallet contains less than the target ratio, purchase asset.
 
 for c in currencies:
     print("\nCurrency: %s\n" % c)
-    calcSpreads(c)
-
+    avg = calcSpreads(c)
+    #print('Average: %s ' % avg)
+    avg = float(avg)
+    if avg < 1.0:
+        avg = 1.0 - avg + 1.0
+    #print(avg)
+    print('Average: %f ' % avg)
