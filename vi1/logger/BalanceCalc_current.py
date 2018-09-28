@@ -8,7 +8,7 @@ import requests
 import datetime	
 
 #CURRENCIES = ["BTC", "XRP", "ETH", "DASH", "ZEC", "XLM", "STR", "LTC", "ETC", "XMR", "LSK", "GNT", "OMG", "XEM", "ZRX", "SC", "REP", "CVC", "FCT"]
-CURRENCIES = ["BTC", "XRP", "ETH", "DASH", "ZEC", "XLM", "STR", "XMR"]
+CURRENCIES = ["BTC", "XRP", "ETH", "DASH", "ZEC", "XLM", "STR", "XMR", "LTC"]
 usdt = False
 verbose = False
 # Policy requested by Kaito:
@@ -45,6 +45,7 @@ def mqpub(msg,topic='messages'):
     client.username_pw_set(username='vibot', password='NmQ5Nj_3MrAwiNDu')
     client.connect("localhost",1883,60)
     client.publish(topic, str(msg));
+    client.publish('balance', str(msg));
     client.disconnect();
 
 
@@ -131,6 +132,9 @@ while 1:
     lprint("BINANCE")
     for key, val in BINANCE.items():
         if key in CURRENCIES:
+            if key == 'BTC':
+                binTotal +=val.get('available')
+                binTotal +=val.get('pending')
             binTotal += val.get("value", 0)
             lprint(str(key) + " " +str(val))
     lprint("BINANCE TOTAL: '%f'\n" % binTotal)
@@ -140,6 +144,9 @@ while 1:
     okTotal = 0
     for key,val in OKEX.items():
         if key in CURRENCIES:
+            if key == 'BTC':
+                okTotal += val.get("available", 0)
+                okTotal += val.get("pending", 0)
             okTotal += val.get("value", 0)
             lprint(str(key) + " " +str(val))
     lprint("OKEX TOTAL: '%f'\n" % okTotal)
@@ -176,4 +183,3 @@ while 1:
     mqpub(netTotal,'balance/net')
     print('Net BTC Value: '+str(netTotal))
     time.sleep(10)
-
