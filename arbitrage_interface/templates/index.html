@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>page2</title>
+    <title>main</title>
+            {% load staticfiles %}
+
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/nav.css">
-    <link rel="stylesheet" href="assets/css/page2.css">
-    <link rel="stylesheet" href="assets/css/materialize.min.css">
+    <link rel="stylesheet" href="{% static 'css/nav.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/materialize.min.css' %}">
 </head>
 
 <body>
@@ -24,15 +26,15 @@
                 </a>
                 <ul class="right hide-on-med-and-down">
                     <li>
-                        <a href="sass.html">
+                        <a href="{% url 'main_app:index' %}">
                             <i class="material-icons left">home</i>MAIN</a>
                     </li>
                     <li>
-                        <a href="badges.html">
+                        <a href="{% url 'stream_app:stream' %}">
                             <i class="material-icons left">data_usage</i>STREAM</a>
                     </li>
                     <li>
-                        <a href="badges.html">
+                        <a href="{% url 'account_app:auth_logout' %}">
                             <i class="material-icons left">rowing</i>LOGOUT</a>
                     </li>
                 </ul>
@@ -102,9 +104,93 @@
         </form>
     </div>
     <!-- UPDATE INUTPS START -->
-    <script src="assets/js/materialize.min.js"></script>
-    <script src="assets/js/page2.js"></script>
-    <script src="assets/js/nav.js"></script>
+    <script src="{% static 'js/materialize.min.js' %}"></script>
+    <script src="{% static 'js/nav.js' %}"></script>
+{#    <script src="{% static 'js/main.js' %}"></script>#}
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+  let elems = document.querySelectorAll('select');
+  let instances = M.FormSelect.init(elems);
+});
+
+checkFormObjectValue = (selector) => {
+  let formObject = document.querySelector(`${selector}`);
+  let instanceFormObject = M.FormSelect.getInstance(formObject);
+  let value = instanceFormObject.getSelectedValues();
+  console.log(value)
+  return value;
+}
+checkInputValue = (selector) => {
+  let input = document.querySelector(`${selector}`);
+  let inputValue = input.value;
+  console.log(inputValue)
+  return inputValue;
+}
+sendDataFromControls = (e) => {
+  e.preventDefault();
+  let gettedExchanges = checkFormObjectValue('#exchanges');
+  let gettetPairs = checkFormObjectValue('#pairs');
+  let gettedInput = checkInputValue('#input_controls1')
+  console.log('gettedExchanges', gettedExchanges)
+  console.log('gettetPairs', gettetPairs)
+  console.log('gettedInput', gettedInput)
+  let bodyToSend = {
+    type: 'config',
+    data: {
+      min_treshold: gettedInput,
+      exchanges: gettedExchanges,
+      pairs: gettetPairs
+    }
+  }
+  console.log('bodyToSend', JSON.stringify(bodyToSend))
+  M.toast({html: 'Config is updating'}) // Its TEMPORARY SOLUTION . NEED TO GO DOWN IN RESPONSE=> TAKE PROPERLY DATA AND DRAW
+  fetch('{% url 'main_app:update_config' %}', {
+    method: 'post',
+    headers: {
+      "Content-type": "application/json"
+    },
+    body: JSON.stringify(bodyToSend)
+  })
+    .then(json)
+    .then(function (data) {
+      console.log('Request succeeded with JSON response', data);
+      //TOAST NEED HERE
+    })
+    .catch(function (error) {
+      console.log('Request failed', error);
+    });
+
+
+}
+buttonsActs = (e) => {
+  let target = event.target;
+  let action = target.getAttribute('data-actionBtn');
+  if (!action) return;
+  console.log(action)
+  fetch(`{% url 'main_app:index' %}${action}`)
+    .then(
+      function (response) {
+        if (response.status !== 200) {
+          console.log('Looks like there was a problem. Status Code: ' +
+            response.status);
+          return;
+        }
+        response.json().then(function (data) {
+          console.log(data);
+        });
+      }
+    )
+    .catch(function (err) {
+      console.log('Fetch Error :-S', err);
+    });
+    M.toast({html: `You pushed the  ${action.toUpperCase()}`})
+}
+
+document.getElementById('send_btn').addEventListener('click', sendDataFromControls);
+document.addEventListener('click', buttonsActs)
+        </script>
+
+
 </body>
 
 </html>

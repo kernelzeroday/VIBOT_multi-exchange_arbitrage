@@ -38,8 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'main_app',
     'account_app',
+    'stream_app',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +75,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'arbitrage_interface.wsgi.application'
 
+
+##### Channels-specific settings
+
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
+
+# Channel layer definitions
+# http://channels.readthedocs.io/en/latest/topics/channel_layers.html
+CHANNEL_LAYERS = {
+    "default": {
+        # This example app uses the Redis channel layer implementation channels_redis
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(redis_host, 6379)],
+        },
+    },
+}
+
+# ASGI_APPLICATION should be set to your outermost router
+ASGI_APPLICATION = 'arbitrage_interface.routing.application'
+
+CHANNEL_GROUP_NAME = 'stream'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -126,5 +149,10 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+
+
+
+
 from .local_settings import *
 

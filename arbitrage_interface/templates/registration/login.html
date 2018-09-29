@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Form</title>
+    <title>Auth</title>
         {% load staticfiles %}
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
@@ -17,7 +17,7 @@
             <h5 class="form__subtitle center-align">Log
                 <span class="blue-text">in</span>
             </h5>
-            <form class="col s12" role="form" action="{% url 'account_app:login' %}" method="post"
+            <form class="col s12" role="form" action="{% url 'account_app:auth_login' %}" method="post"
                               enctype="multipart/form-data">
                                             {% csrf_token %}
                 <div class="row">

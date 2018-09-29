@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stream</title>
+</head>
+<body>
+<div class="data1">
+            <button id="btn1" data-data="data1">data1</button>
+            <div class="container-data1">
+
+            </div>
+        </div>
+            {% load staticfiles %}
+<script src="{% static 'js/socket.io.js' %}"></script>
+<script>
+var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+var ws_path = ws_scheme + '://' + window.location.host + "/stream/";
+const socket = io('wss://127.0.0.1:8000/stream/');
+
+// socket.on('showOptions', options => showOptions(options));
+let btn1 = document.querySelector('#btn1')
+btn1.addEventListener('click', drawdata1)
+function drawdata1() {
+  socket.on('test', data => checkData1(data));
+}
+
+function checkData1(data) {
+  console.log(data)
+  let conttainer1 = document.querySelector('.container-data1');
+
+  data.forEach(element => {
+    let p = document.createElement('p'); // is a node
+    p.innerHTML = `
+    ${JSON.stringify(element)}
+`;
+    conttainer1.appendChild(p)
+  });
+  console.log(conttainer1)
+}
+</script>
+</body>
+
+</html>
