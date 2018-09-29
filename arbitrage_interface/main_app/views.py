@@ -42,7 +42,7 @@ def pause(request):
 def update_config(request):
     if request.method != 'POST':
         return redirect('arbitrage_app:index') #todo: add error
-    data = json.dumps(request.body)
+    data = json.loads(request.body.decode('utf8'))
     if 'type' in data:
         return json.dumps({'success': False, 'error':"Expected 'type' and 'data, instead %s" % data})
     if data['type'] is not 'config':

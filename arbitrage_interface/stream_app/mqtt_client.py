@@ -11,19 +11,6 @@ class MMQTClient:
         if not hasattr(self, 'client'):
             self.client = self.mqStart(MQ_SUBTOP)
 
-    def getTopicFunc(self, topic):
-        """ This function maps incoming mq topics to a parsing function
-        :param topic:   MQTT Subscription Topic
-        :return         function to handle MQTT message body, or False
-        """
-        global EXCHANGES
-        funcMap = {
-            "bbal2": EXCHANGES["bittrex"].updateBalance if "bittrex" in EXCHANGES else False,
-            "cbal2": EXCHANGES["cex"].updateBalance if "cex" in EXCHANGES else False,
-            "pbal2": EXCHANGES["poloniex"].updateBalance if "poloniex" in EXCHANGES else False,
-        }
-        return funcMap.get(topic, False)
-
     def mqParse(self, client, userdata, message):
         """ MQTT Connect Event Listener
         :param client:      Client instance
