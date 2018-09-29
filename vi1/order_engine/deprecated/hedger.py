@@ -177,6 +177,97 @@ class Poloniex(Exchange):
             volumeTotal += vol
         super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
 
+
+class Binance(Exchange):
+    def __init__(self, name):
+        pairs = {   # todo: where get required pairs?
+            "BTC_XRP":  {"name": "BTC_XRP"},
+            "BTC_ETH":  {"name": "BTC_ETH"},
+            "BTC_DASH": {"name": "BTC_DASH"},
+            "BTC_ZEC":  {"name": "BTC_ZEC"},
+            "BTC_XLM":  {"name": "BTC_STR"},
+            "BTC_LTC":  {"name": "BTC_LTC"},
+            "BTC_LSK":  {"name": "BTC_LSK"},
+            "BTC_ETC":  {"name": "BTC_ETC"},
+            "BTC_OMG":  {"name": "BTC_OMG"},
+        }
+        inversePairs = {v["name"]: k for k, v in pairs.items()}
+        volumeTotal = Decimal()
+        tickers = getJSON('https://api.binance.com/api/v1/ticker/24hr')
+        if not tickers:
+            #todo: add log here
+            return
+        prep_tickers = self._tickers_to_dict(tickers)
+        # Get market volumes
+        for k, v in pairs.items():
+            vol = Decimal(prep_tickers.get(
+                self._pair_symbol_to_ex_style(v.get("name", False)), {})
+                .get("volume", 0)      # "quoteVolume" is what we need??
+            ).quantize(
+                BTC_PRECISION, rounding=ROUND_DOWN
+            )
+            pairs[k]["volume"] = vol
+            volumeTotal += vol
+        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+
+    def _tickers_to_dict(self, tickers):
+        result = {}
+        for ticker in tickers:
+            result[ticker['symbol']] = ticker
+        return result
+
+    def _pair_symbol_to_ex_style(self, pair):
+        b_curr, q_curr = pair.split('_')
+        return "".join([q_curr,b_curr])
+
+
+class Okex(Exchange):
+    def __init__(self, name):
+        pairs = {   # todo: where get pairs?
+            "BTC_XRP":  {"name": "BTC_XRP"},
+            "BTC_ETH":  {"name": "BTC_ETH"},
+            "BTC_DASH": {"name": "BTC_DASH"},
+            "BTC_ZEC":  {"name": "BTC_ZEC"},
+            "BTC_XLM":  {"name": "BTC_STR"},
+            "BTC_LTC":  {"name": "BTC_LTC"},
+            "BTC_LSK":  {"name": "BTC_LSK"},
+            "BTC_ETC":  {"name": "BTC_ETC"},
+            "BTC_OMG":  {"name": "BTC_OMG"},
+        }
+        inversePairs = {v["name"]: k for k, v in pairs.items()}
+        volumeTotal = Decimal()
+        # Get market volumes
+        for k, v in pairs.items():
+            ticker = getJSON('https://www.okex.com/api/v1/ticker.do?symbol=%s' % self._pair_symbol_to_ex_style(k.lower()))  # todo: sync request for each pair, ask Chev if this permissible
+            ticker = ticker['ticker']
+            if self._check_ticker(ticker) is False:
+                continue
+            vol = Decimal(ticker.get("vol", 0)
+            ).quantize(
+                BTC_PRECISION, rounding=ROUND_DOWN
+            )
+            pairs[k]["volume"] = vol
+            volumeTotal += vol
+        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+
+    def _tickers_to_dict(self, tickers: list):
+        result = {}
+        for ticker in tickers:
+            result[ticker['symbol']] = ticker
+        return result
+
+    def _check_ticker(self, ticker):
+        expected_keys = ['high', 'vol', 'last', 'low', 'buy', 'sell']
+        if not sorted(ticker.keys()) == sorted(expected_keys):
+            #todo: add error log here
+            return False
+        return True
+
+    def _pair_symbol_to_ex_style(self, pair):
+        b_curr, q_curr = pair.split('_')
+        return "_".join([q_curr.lower(),b_curr.lower()])
+
+
 """
 def printHedge():
     global VOLUME
@@ -201,7 +292,7 @@ def pubHedge():
             #r = str(Pair["hedgeRatio"])
             #if pair == pair_:
             #    return('{' + pair_ + ":" + r+'}')
-            mqPublish(message,'messages')
+            # mqPublish(message,'messages')
             print(message)
         print("%s\t- TOTAL BTC:\t%s (%s %%)" % (
             ExName, Ex.volumeTotal, (Ex.volumeTotal * Decimal('100') / VOLUME).quantize(Decimal('0.01'), rounding=ROUND_DOWN)))
@@ -211,11 +302,16 @@ def pubHedge():
 bit = Bittrex("bittrex")
 cex = Cex("cex")
 pol = Poloniex("poloniex")
+bin = Binance("binance")
+oke = Okex("okex")
+
 mq_host = 'localhost'
 mq_port = 1883
 mq_user = 'vibot'
 mq_pass = 'NmQ5Nj_3MrAwiNDu'
 mq_pubtop = 'messages'
+
+
 #printHedge()
 while 1:
 
