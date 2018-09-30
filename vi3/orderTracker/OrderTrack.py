@@ -4,8 +4,6 @@
 
 import time,os,sys,json,threading,logging,signal,random
 import paho.mqtt.client as mqtt
-#import config
-#import bittrex
 import poloniex
 import cexio
 
@@ -29,9 +27,10 @@ okex.secret = config.okexSecret
 
 # vars
 verbose=True
-debug=False
+debug=True
 simulate=False
 count=0
+threads=[]
 maxThreads = 1000
 # logger stuff
 logger = logging.getLogger(__name__)
@@ -92,23 +91,38 @@ def cancel_order(exchange,orderID,pair='null'):
                 if verbose: print("[*] Bittrex order %s filled..." % order_id)
                 return False
 
-    """ TODO: Verifiy this function... see below
-    """
-    def cancel_okex(order_id):
+    def cancel_okex(order_id,pair):
+        origPair = str(pair)
         try:
-            ret = okex.cancel_order(order_id)
+            pair = pair.split('-')
+        except:
+            pair = pair.split('/')
+        finally:
+        #else:
+            #pair = str(pair)
+            try:
+                pair = pair[1]+'/'+pair[0]
+            except Exception as err:
+                print('ERROR: '+str(err))
+                #return False
+            else:
+                pair = str(pair)
+
+        try:
+            ret = okex.cancel_order(id=order_id,symbol=pair)
         except Exception as err:
             logger.info("Error canceling okex error" + str(err))
+            if verbose: print("[*] Okex order %s filled..." % order_id)
             return False
         else:
-            if ret == '': # Bittrex returns nothing upon success, does okex do the same? TODO: Verifiy this
-                logger.info("Successfully canceled okex order")
-                if verbose or debug: print('[*] Successfully canceled order %s' % order_id)
-                return True
-            else:
-                if debug: print("[!] Failed cancel okex order call: "+str(ret))
-                if verbose: print("[*] Okex order %s filled..." % order_id)
-                return False
+            #if ret['result'] == 'True': # Bittrex returns nothing upon success, does okex do the same? TODO: Verifiy this
+            logger.info("Successfully canceled okex order")
+            if verbose or debug: print('[*] Successfully canceled order %s' % order_id)
+            return True
+            ##else:
+            #    if debug: print("[!] Failed cancel okex order call: "+str(ret))
+            #    if verbose: print("[*] Okex order %s filled..." % order_id)
+            #    return False
 
     def cancel_poloniex(order_id):
         poloniexAPI = poloniex.Poloniex(config.poloniexKey,config.poloniexSecret)
@@ -191,7 +205,7 @@ def cancel_order(exchange,orderID,pair='null'):
         if exchange == 'binance':
             ret = cancel_binance(orderID,pair) # Binance api is silly and requires a pair to cancel an order
         if exchange == 'okex':
-            ret = cancel_okex(orderID)
+            ret = cancel_okex(orderID,pair) # as is okex api
     #if debug: print(ret)
 
 def get_ticker(exchange,pair,mode):
@@ -205,7 +219,7 @@ def get_ticker(exchange,pair,mode):
         except:
             pair = pair.split('/')
         finally:
-            if debug: print('[*] DEBUG: '+str(pair))
+            #if debug: print('[*] DEBUG: '+str(pair))
             pair = pair[1]+pair[0]
 
         pair = str(pair)
@@ -225,7 +239,7 @@ def get_ticker(exchange,pair,mode):
                 tt = tt['askPrice']
             elif mode == 'sell':
                 tt = tt['bidPrice']
-            if debug: print('[*] Binance ticker call: '+ str(tt))
+            if debug: print('[*] Binance ticker call: '+ str(pair)+ ' : '+ str(tt))
             return(tt)
 
     def okex_ticker(pair,mode):
@@ -252,7 +266,7 @@ def get_ticker(exchange,pair,mode):
                 tt = t['ask']
             elif mode == 'sell':
                 tt = t['bid']
-            if debug: print('[*] okex ticker call: '+ str(tt))
+            if debug: print('[*] Okex ticker call: '+ str(pair)+ ' : '+ str(tt))
             return(tt)
 
 
@@ -276,6 +290,7 @@ def get_ticker(exchange,pair,mode):
                 tt = tt['Ask']
             elif mode == 'sell':
                 tt = tt['Bid']
+            if debug: print('[*] Bittrex ticker call: '+ str(pair)+ ' : '+ str(tt))
             return(tt)
 
     def polo_ticker(pair,mode):
@@ -288,7 +303,8 @@ def get_ticker(exchange,pair,mode):
             ret = ret['lowestAsk']
         elif mode == 'sell':
             ret = ret['highestBid']
-        logger.info("Ticker call: "+str(ret))
+        logger.info("Poloniex Ticker call: "+str(ret))
+        if debug: print('[*] Poloniex ticker call: '+ str(pair)+ ' : '+ str(tt))
         return(ret)
     
     def cex_ticker(pair,mode):
@@ -301,6 +317,7 @@ def get_ticker(exchange,pair,mode):
                 data = data['ask']
             elif mode == 'sell':
                 data = data['bid']
+            if debug: print('[*] Cex ticker call: '+ str(pair)+ ' : '+ str(tt))
             return(data)
         except Exception as err:
             print("Error: %s" % err)
@@ -337,7 +354,7 @@ def viable(exchange,mode,orig,pair,kind='Arbitrage'):
     if kind == 'Arbitrage':
         viablePct = 0.1
     else:
-        viablePct = 0.5
+        viablePct = 0.25
     if mode == 'sell':
         decrease = float(orig) - float(new)
         pct = float(decrease) / float(orig) * float(100.00)
@@ -369,18 +386,15 @@ strategy.) If the order is not consiered viable (not likely to fill any
 
 def que_Order(exchange,expire,orderID,mode,pair,price,kind):
     t = random.randint(1,5)
-    wait = random.randint(3,10)
-    _wait = str(wait)
-    _exchange = str(exchange)
-    _orderID = str(orderID)
+    wait = random.randint(3,10);_wait = str(wait);_exchange = str(exchange);_orderID = str(orderID)
     while True:
         if float(expire) <= tS() and kind == 'Limit':
             print('[*] Limit Order')
             if viable(exchange,mode,price,pair,kind):
-                mqsend('[*] Order %s on exchange %s still viable, sleeping for %s secs ..'% (_orderID,_exchange,_wait))
-                time.sleep(_wait)
+                mqsend('[*] Limit Order %s on exchange %s still viable, sleeping for %s secs ..'% (_orderID,_exchange,_wait))
+                time.sleep(wait)
             else:
-                mqsend("[*] %s order with id: %s expired, canceling...", (exchange,orderID))
+                mqsend("[*] Limit %s order with id: %s expired, canceling...", (exchange,orderID))
                 logger.info('%s order timed out, canceling...' % exchange)
                 ret = cancel_order(exchange,orderID,pair)
                 mqsend('[*] Request cancel Limit order. Status:' +str(ret))
@@ -527,13 +541,11 @@ def mqParse(client, userdata, message):
     # Received an order, prepare to que
     if kind_ == 'Limit':
         if verbose or debug:
-            print("[*] Tracking new order on exchange %s : %s , expires %s " % (exchange_,orderID_,expires_))
-        mqsend("Tracking new %s order on exchange %s : %s , expires %s" % (mode_,exchange_,orderID_,expires_))
-        threads=[]
-        count=0
+            print("[*] Tracking new Limit order on exchange %s : %s , expires %s " % (exchange_,orderID_,expires_))
+        mqsend("Tracking new %s Limit order on exchange %s : %s , expires %s" % (mode_,exchange_,orderID_,expires_))
+        #threads=[]
     elif kind_ == 'Arbitrage':
-        threads=[]
-        count=0
+        #threads=[]
         if verbose or debug:
             mqsend("[*] Tracking new Arbitrage order on exchange %s : %s , expires a few seconds from now " % (exchange_,orderID_))
             now = time.time()
