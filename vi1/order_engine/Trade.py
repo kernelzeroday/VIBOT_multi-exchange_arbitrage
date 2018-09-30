@@ -6,6 +6,7 @@ import sys
 import signal
 import time
 import requests
+import profile
 import random
 import json
 from decimal import *
@@ -13,6 +14,7 @@ from collections import namedtuple
 # 3rd Party
 #import okex from ccxt as OkexAPI
 from ccxt import okex as OkexAPI
+from ccxt import binance as binanceAPI
 import ccxt
 from binance.client import Client as BinanceAPI
 import poloniex as PoloniexAPI
@@ -22,10 +24,9 @@ import paho.mqtt.client as mqtt
 # Custom
 import pairInfo
 import config
-#net = float(135.0)
 
-DEBUG = True
-LIVE = False
+DEBUG = False
+LIVE = True
 ORDERBACK = True
 INTERACTIVE = os.environ.get('PYTHONINSPECT', False) or hasattr(sys, "ps1") or hasattr(sys, "ps2") or False
 BTC_PRECISION = Decimal('0.00000001')
@@ -34,7 +35,7 @@ PAIR_ARR = pairInfo.PAIR_ARR
 #SUBSCRIPTIONS = [("/spread"+v, 0) for v in PAIR_ARR]
 #SUBSCRIPTIONS = [("/spread/#")]
 SUBSCRIPTIONS = [("/spread/"+v, 0) for v in PAIR_ARR]
-SUBSCRIPTIONS += [("pbal2", 0), ("cbal2", 0), ("bbal2", 0), ("binbal2", 0), ("okbal2", 0)]
+SUBSCRIPTIONS += [("pbal2", 0), ("cbal2", 0), ("bbal2", 0), ("binbal2", 0), ("okbal2", 0), ('balance/net', 0)]
 LASTPROCESSED = {}
 
 CURRENCIES = {}
@@ -42,6 +43,7 @@ PAIRS = {}
 BALANCES = {}
 EXCHANGES = {}
 CLIENTS = {}
+global NET
 VOLUME = Decimal()
 
 #grab binance market data
@@ -82,11 +84,11 @@ def getJSON(url):
                 return res
     return False
 
-def pubprint(data):
+def pubprint(data,topic='messages'):
 
     data_ = str("{'TRADE': "+str(data)+" }")
     try:
-        mqPublish(id='trade',payload=data_, topic='messages')
+        mqPublish(id='trade',payload=data_, topic=topic)
     except Exception as err:
         pass
     print(data)
@@ -132,6 +134,18 @@ class Pair:
         PAIRS[self.name] = self
 
 
+class Net:
+    def __init__(self):
+        global NET
+        self.net = Decimal(0)
+    def update(self,val):
+        self.net = val
+        print('Updated Net Balance to ' + str(val))
+
+    def get(self):
+        net = self.net
+        return net
+
 class Balance:
     def __init__(self, exchange, currency=""):
         global BALANCES
@@ -146,6 +160,7 @@ class Balance:
         self.available = Decimal(0)
         self.pending = Decimal(0)
         self.total = Decimal(0)
+
         self.Total = Decimal(0)
         self.reserved = Decimal(0)
 
@@ -277,24 +292,7 @@ class Exchange:
             pubprint("Qty changed for %s %s order due to lack of funds. From %s to %s" % (self.name, side, qty, available))
             qty = available
         else:
-            #if balance.total == 0.0 and SUGGEST:
-                #sendAmt = float(balance.pending)  / 2
-            #    exx=self.name
-            #    exx=str(exx)
-            #    currency=str(currency)
-            #    msg_ = 'Suggest: Buy! Low Balance on '+str(exx)+' currency: '+str(currency) + ' Target ratio :  '+str(ratio)
-            #    try: 
-            #        mqPublish('trade',msg_, topic='messages')
-            #    except Exception as err:
-            #        print('Error publishing: '+str(err))
-            #        pass
             raise ValueError("No %s available on %s (%s reserved, %s pending, %s total)" % (currency, self.name, balance.reserved, balance.pending, balance.total))
-            #ratio_=str(ratio)
-            #try:
-            #    msg_ = str("""'{"action":"balance","amount":"%s", "currency":%s,"exchange":"%s"}'""" %(currency,ratio_,self.name))
-            #    mqPublish('trade',msg_, topic='zenbot')
-            ##except Exception as err:
-            #    print('Error publishing message'+str(err))
         if side == "buy":
             # Switch qty back
              qty = (Decimal(qty) / price).quantize(qtyPrecision, rounding=ROUND_DOWN)
@@ -303,53 +301,43 @@ class Exchange:
         minType = pair.get("minType", False)
         if not minType:
             raise ValueError("Could not find minType for %s %s" % (self.name, pairName))
+            minType == 'ccxt'
+        """ Fixed This so that it actually works... Quantize...  
+            val = (qty * price).quantize(pricePrecision, rounding=ROUND_DOWN) """
         if minType == "ccxt":
-            if self.name == "binance" or "cex" or "poloniex" or "bittrex" or "okex":
+            minQty = 0.0
+            if self.name == "binance":
                 ccxtname = pairName.split('-')
                 ccxtname.reverse()
                 ccxtname = '/'.join(ccxtname)
-                pairmarket = marketdata[self.name] # answer phone
-                minQty = ''
-                for i in pairmarket:
-                    if i['symbol'] == ccxtname:
-                        minQty = i['limits']['amount']['min']
-                        break
-                #minQty = pairmarket['limits']['amount']['min']
-                if not minQty:
-                        raise ValueError("Could not find minQty for %s %s" % (self.name, ccxtname))
-                if Decimal(qty) < Decimal(minQty):
-                        raise ValueError("Error: The requested %s order qty (%s) is too low for %s (%s)" % (pairName, qty, self.name, minQty))    
-
-        if minType == "qty":
-            minQty = pair.get("minQty", False)
+                pairmarket = marketdata[self.name]
+            if self.name == "bittrex":
+                ccxtname = pairName.split('-')
+                ccxtname.reverse()
+                ccxtname = '/'.join(ccxtname)
+                pairmarket = marketdata[self.name]
+            if self.name == "okex":
+                ccxtname = pairName.split('-')
+                ccxtname.reverse()
+                ccxtname = '/'.join(ccxtname)
+                pairmarket = marketdata[self.name]
+            if self.name == 'poloniex':
+                ccxtname = pairName.split('_')
+                ccxtname.reverse()
+                ccxtname = '/'.join(ccxtname)
+                pairmarket = marketdata[self.name]
+            if self.name == 'cex':
+                ccxtname = pairName.split('/')
+                ccxtname = '/'.join(ccxtname)
+                pairmarket = marketdata[self.name]
+            
+            for i in pairmarket:
+                if i['symbol'] == ccxtname:
+                    minQty = i['limits']['amount']['min']
             if not minQty:
-                raise ValueError("Could not find minQty for %s %s" % (self.name, pairName))
-            if qty < minQty:
-                raise ValueError("Error: The requested %s order qty (%s) is too low for %s (%s)" % (pairName, qty, self.name, minQty))
-
-        elif minType == "val":
-            minVal = pair.get("minVal", False)
-            if not minVal:
-                raise ValueError("Could not find minVal for %s %s" % (self.name, pairName))
-            val = (qty * price).quantize(pricePrecision, rounding=ROUND_DOWN)
-            if val < minVal:
-                raise ValueError("Error: The requested %s order value (%s) is too low for %s (%s)" % (pairName, val, self.name, minVal))
-
-        elif minType == "qtyval":
-            minQty = pair.get("minQty", False)
-            minVal = pair.get("minVal", False)
-            if not (minQty and minVal):
-                raise ValueError("Could not find minQty or minVal on %s %s" % (self.name, pairName))
-            if qty < minQty:
-                raise ValueError("The requested %s order qty (%s) is too low for %s (%s)" % (pairName, qty, self.name, minQty))
-            val = (qty * price).quantize(pricePrecision, rounding=ROUND_DOWN)
-            if val < minVal:
-                raise ValueError("The requested %s order value (%s) is too low for %s (%s)" % (pairName, val, self.name, minVal))
-        elif minType == 'ccxt':
-            pass
-        else:
-            raise ValueError("Invalid minType for %s %s" % (self.name, pairName))
-
+                    raise ValueError("ERROR: could not find minQty for %s %s" % (self.name, ccxtname))
+            if Decimal(qty) < Decimal(minQty):
+                    raise ValueError("Error: The requested %s order qty (%s) is too low for %s (%s)" % (pairName, qty, self.name, minQty))
         return (balance, price, qty, ratio)
 
     def updateBalance(self, currency, available, pending):
@@ -358,12 +346,16 @@ class Exchange:
             bal.update(available, pending)
 
     def buy(self, pair, price, qty, kind="Arbitrage", orderID="", reference=""):
+
         # On completion publish message
         now = time.time()
         expires = 0
-        later = random.randint(150,300)
-        if kind != "Arbitrage":
+        later = random.randint(30,60)
+        even_later = random.randint(30,90)
+        if kind == "Arbitrage":
             expires = now + later
+        elif kind == 'Limit':
+            expires = now + even_later
         msg = json.dumps({
             "Exchange": self.name,
             "Pair": pair,
@@ -387,8 +379,8 @@ class Exchange:
         # On completion publish message
         now = time.time()
         expires = 0
-        later = random.randint(150,300)
-        even_later = random.randint(300,900)
+        later = random.randint(15,30)
+        even_later = random.randint(30,90)
         if kind == "Limit":
             expires = now + even_later
         elif kind == "Arbitrage":
@@ -478,8 +470,8 @@ class Bittrex(Exchange):
             print("Bittrex Error Calling API.buylimit(): %s" % err)
             return False
         else:
-            if not res.get("success", False): # ok so basically, is res defined anywhere else? let me show you the eror i was getting before i did that. 
-#               msg = res[res.index("message"), ""] 
+            if not res.get("success", False): 
+                #msg = res[res.index("message"), ""] 
                 msg = res.get("message", "")
                 print("Bittrex Buy Order Placement Failed: %s" % msg)
                 return False
@@ -534,14 +526,8 @@ class Okex(Exchange):
             raise ValueError("Could not find any pairs")
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
-        
-        # Get market volumes
-        #tickers = getJSON("https://poloniex.com/public?command=returnTicker")
-        #tickers = client.get_klines(symbol=pair, limit=1,interval=Client.KLINE_INTERVAL_30MINUTE)
         tickers = []
         for p in pairs:
-            #ticker = client.get_klines(symbol=p, limit=1,interval=Client.KLINE_INTERVAL_30MINUTE)
-            #ticker = ticker[0][5]
             pairname = pair['name'].split('-')
             pairname.reverse()
             pairname = '/'.join(pairname)
@@ -578,8 +564,6 @@ class Okex(Exchange):
         pairname = '/'.join(pairname)
 
         try:
-            # changed to BinanceAPI
-            #res = BinanceAPI.order_limit_buy(symbol=pair, quantity=str(qty), price=str(price))
             res = okex.createLimitBuyOrder (pairname, qty, price)
         except Exception as err:
             print("Binance Error Calling API.buy(): %s" % err)
@@ -587,7 +571,7 @@ class Okex(Exchange):
         else:
             orderID = res.get("id", False)
             if not orderID:
-                print("Binance Buy Order Placement Failed")
+                print("Okex Buy Order Placement Failed")
                 return False
             # Pass relevant info for tracking and logging via this method's super method (existing in the Exchange class)
             else:
@@ -598,7 +582,6 @@ class Okex(Exchange):
         pairname.reverse()
         pairname = '/'.join(pairname)
         try:
-            #res = BinanceAPI.order_limit_sell(symbol=pair, quantity=str(qty), price=str(price))
             res = okex.createLimitSellOrder (pairname, qty, price)
             """
             :returns dict
@@ -624,7 +607,8 @@ class Binance(Exchange):
     def __init__(self, pairs=[]):
         binance.apiKey = config.binanceKey
         binance.secret = config.binanceSecret
-        self.api = BinanceAPI(config.binanceKey, config.binanceSecret)
+        #self.api = BinanceAPI({"apiKey":config.binanceKey,"secret":config.binanceSecret})
+        #self.api = BinanceAPI(config.binanceKey,config.binanceSecret)
         self.currencyMap = {
             "STR": "XLM",
         }
@@ -641,13 +625,8 @@ class Binance(Exchange):
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
         
-        # Get market volumes
-        #tickers = getJSON("https://poloniex.com/public?command=returnTicker")
-        #tickers = client.get_klines(symbol=pair, limit=1,interval=Client.KLINE_INTERVAL_30MINUTE)
         tickers = []
         for p in pairs:
-            #ticker = client.get_klines(symbol=p, limit=1,interval=Client.KLINE_INTERVAL_30MINUTE)
-            #ticker = ticker[0][5]
             pairname = pair['name'].split('-')
             pairname.reverse()
             pairname = '/'.join(pairname)
@@ -686,7 +665,8 @@ class Binance(Exchange):
         try:
             # changed to BinanceAPI
             #res = BinanceAPI.order_limit_buy(symbol=pair, quantity=str(qty), price=str(price))
-            res = binance.createLimitBuyOrder (pairname, qty, price)
+            #res = binance.createLimitBuyOrder (pairname, qty, price)
+            res = binance.create_order(pairname, 'LIMIT', 'BUY', qty, price)
         except Exception as err:
             print("Binance Error Calling API.buy(): %s" % err)
             return False
@@ -705,7 +685,8 @@ class Binance(Exchange):
         pairname = '/'.join(pairname)
         try:
             #res = BinanceAPI.order_limit_sell(symbol=pair, quantity=str(qty), price=str(price))
-            res = binance.createLimitSellOrder (pairname, qty, price)
+            #res = binance.createLimitSellOrder (pairname, qty, price)
+            res = binance.create_order(pairname, 'LIMIT', 'SELL', qty, price)
             """
             :returns dict
             As above with "type":"sell"
@@ -950,7 +931,6 @@ def parseSpreads(pair, spreads):
     global ORDERBACK
     global EXCHANGES
     #BUYBACK = SELLBACK = False
-    #ALLOW_BUYBACK = ALLOW_SELLBACK = True
     Spread = namedtuple('Spread', ['Name', 'BuyFrom', 'BuyPrice', 'BuyQty', 'BuyFee',
                                    'SellTo', 'SellPrice', 'SellQty', 'SellFee',
                                    'Value', 'EMA', 'EMVAR', 'Score',
@@ -964,6 +944,7 @@ def parseSpreads(pair, spreads):
     else:
         for spread in spreads:
             check = LASTPROCESSED.get(spread.Name, Decimal())
+            #ORDERBACK = True
             if spread.Type == 'steady' or spread.Count > 1:
                 ORDERBACK = False
             else:
@@ -1000,9 +981,11 @@ def parseSpreads(pair, spreads):
                 # Reserve this qty for the following trades
                 buyBal.reserved = Decimal(buyBal.reserved)
                 sellBal.reserved = Decimal(sellBal.reserved)
-
-                buyRes = buyBal.Total_
-                sellRes = sellBal.Total_
+                #try:
+                #    buyRes = buyBal.Total_
+                #    sellRes = sellBal.Total_
+                #except:
+                #    pass
                 buyBal.reserved += Decimal(buyQty)
                 sellBal.reserved += Decimal(sellQty)
 
@@ -1013,9 +996,14 @@ def parseSpreads(pair, spreads):
                 With Instant Market Rebalance (Should be limit orders, ie Maker Fees)"""
                 BUYBACK = SELLBACK = False
                 if LIVE:
+                  #if (Decimal(sellQty) * Decimal(sellPrice)) <= Decimal(0.0001):
+                  #print('Discarding trade, qty too low')
+                  #return False
+                  #else:
                     # Arb Sell
                     if sellEx.sell(sellPair, sellPrice, sellQty):
-                        try:
+                        BUYBACK = True
+                        """try:
                             pubprint('SellEx Ratio : '+str(ratio))
                             bAmt = float(net) / float(buyRes)
                             cRatio = percentage(bAmt,net)
@@ -1023,15 +1011,16 @@ def parseSpreads(pair, spreads):
                         except Exception as err:
                             pass
                         try:
-                            if cRatio < ratio:
+                            if cRatio <= ratio:
                                 pubprint('Allow Buyback:  Ratio: '+str(cRatio)+' Allocated Ratio: '+str(ratio))
                                 BUYBACK = True
                         except:
-                            pass
+                            pass"""
 
                     # Arb buy
                         if buyEx.buy(buyPair, buyPrice, buyQty):
-                            try:
+                            SELLBACK=True
+                            """try:
                                 pubprint('BuyEx Ratio : '+str(ratio))
                             except:
                                 pass
@@ -1041,9 +1030,9 @@ def parseSpreads(pair, spreads):
                             except Exception as err:
                                 pass
                             else:
-                                if cRatio > ratio:
+                                if cRatio >= ratio:
                                     pubprint('Allow SellBack: Ratio '+str(cRatio)+' Allocated Ratio: '+str(ratio))
-                                    SELLBACK = True
+                                    SELLBACK = True"""
 
                 else:
                     debugPrint("%s Sold %s %s at %s" % (sellEx.name, sellQty, sellPair, sellPrice))
@@ -1051,7 +1040,6 @@ def parseSpreads(pair, spreads):
                     BUYBACK = SELLBACK = True
 
                 if ORDERBACK and (BUYBACK or SELLBACK):
-                    
                     buyBackPrice = (buyPrice * (Decimal('1') - sellEx.fee))
                     buyBackQty = (buyQty * (Decimal('1') - sellEx.fee))
                     sellBackPrice = (sellPrice * (Decimal('1') + buyEx.fee))
@@ -1118,7 +1106,8 @@ def getTopicFunc(topic):
         "cbal2": EXCHANGES["cex"].updateBalance if "cex" in EXCHANGES else False,
         "pbal2": EXCHANGES["poloniex"].updateBalance if "poloniex" in EXCHANGES else False,
 	"okbal2": EXCHANGES["okex"].updateBalance if "okex" in EXCHANGES else False,
-        "binbal2": EXCHANGES["binance"].updateBalance if "binance" in EXCHANGES else False
+        "binbal2": EXCHANGES["binance"].updateBalance if "binance" in EXCHANGES else False,
+        #"balance/net": Net.update
     }
     return funcMap.get(topic, False)
 
@@ -1194,6 +1183,12 @@ def mqParse(client, userdata, message):
         func = getTopicFunc(message.topic)
         if func:
             func(message.payload)
+    elif "balance/net" in message.topic:
+        #func = Net.update(message.payload)
+        #func = getTopicFunc(message.topic)
+        msg = (message.payload.decode())
+        #print(msg)
+        NET.update(msg)
     else:
         func = getTopicFunc(message.topic)
         if func:
@@ -1268,8 +1263,7 @@ def printHedge():
 def main():
     global CLIENTS
     global PAIRS
-    # Don't subscribe until after ecerything is initialized
-    #client = mqStart("trade") 
+    global NET
     # Signal handling
     def signalHandler(signal, frame):
         try:
@@ -1292,6 +1286,9 @@ def main():
     Okex(PAIR_ARR)
     Binance(PAIR_ARR)
 
+    NET = Net()
+    NET.update('0.0')
+
     printHedge()
 
     # Start a MQ Client
@@ -1300,8 +1297,8 @@ def main():
     if not INTERACTIVE:
         # Infinite Loop if interactive
         while 1:
-            time.sleep(0.25)
+            continue
 
+#profile.run('main()')
 
 main()
-
