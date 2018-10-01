@@ -22,4 +22,3 @@ binanceSecret = 'r0XkzQBMC6xHXTz7IE9DF9yHmwqWBsuul3lJlX6TfT8YCqqYViItBSdtEkBdZ53
 
 okexKey = '77f7bb10-6ae4-44c6-8eeb-9710a5fa86d8'
 okexSecret = '3E0BA281918F51897158E1B1D10B6D70'
-

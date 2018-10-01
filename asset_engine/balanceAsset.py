@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.6
 # Auto Balance Exchange Wallets
-""" 
+"""
 This Program is intended to purchase asset if needed
 when the market spread is as close to zero as possible.
 Than we can arbitrage the asset later. This method has
@@ -13,11 +13,14 @@ import math
 import config
 tickers = []
 bals = []
-pairs = ['XRP/BTC','ETH/BTC','DASH/BTC',"XLM/BTC","ZEC/BTC","XMR/BTC"]
-exchanges = ['bittrex','binance','cex','okex','poloniex']
-currencies = ['XRP','ETH','DASH','ZEC','XLM','XMR']
+pairs = ['XRP/BTC', 'ETH/BTC', 'DASH/BTC', "XLM/BTC", "ZEC/BTC", "XMR/BTC"]
+exchanges = ['bittrex', 'binance', 'cex', 'okex', 'poloniex']
+currencies = ['XRP', 'ETH', 'DASH', 'ZEC', 'XLM', 'XMR']
+
+
 def average(numbers):
     return float(sum(numbers)) / max(len(numbers), 1)
+
 
 global cex
 global poloniex
@@ -26,12 +29,17 @@ global bitrrex
 global okex
 
 
-binanceAPI = ccxt.binance({"apiKey":config.binanceKey, "secret":config.binanceSecret})
-bittrexAPI = ccxt.bittrex({"apiKey":config.bittrexKey, "secret":config.bittrexSecret})
-cexAPI = ccxt.cex({"apiKey":config.cexKey,"secret":config.cexSecret,"uid":config.cexUser})
-okexAPI = ccxt.okex({"apiKey":config.okexKey,"secret":config.okexSecret})
-poloniexAPI = ccxt.poloniex({"apiKey":config.poloniexKey,"secret":config.poloniexSecret})
-okexAPI = ccxt.okex({"apiKey":config.okexKey,"secret":config.okexSecret})
+binanceAPI = ccxt.binance(
+    {"apiKey": config.binanceKey, "secret": config.binanceSecret})
+bittrexAPI = ccxt.bittrex(
+    {"apiKey": config.bittrexKey, "secret": config.bittrexSecret})
+cexAPI = ccxt.cex({"apiKey": config.cexKey,
+                   "secret": config.cexSecret,
+                   "uid": config.cexUser})
+okexAPI = ccxt.okex({"apiKey": config.okexKey, "secret": config.okexSecret})
+poloniexAPI = ccxt.poloniex(
+    {"apiKey": config.poloniexKey, "secret": config.poloniexSecret})
+okexAPI = ccxt.okex({"apiKey": config.okexKey, "secret": config.okexSecret})
 
 binanceBals = {}
 bittrexBals = {}
@@ -86,7 +94,7 @@ for key, val in binanceTickers.items():
         binanceXLM = val['ask']
     if key in 'XMR/BTC':
         binanceXMR = val['ask']
-        
+
 for key, val in bittrexTickers.items():
     if key in "ETH/BTC":
         bittrexETH = val['ask']
@@ -102,10 +110,10 @@ for key, val in bittrexTickers.items():
         bittrexXMR = val['ask']
 
 
-for key,val in cexTickers.items():
-    
+for key, val in cexTickers.items():
+
     if key in "ETH/BTC":
-       cexETH = val['ask']
+        cexETH = val['ask']
     if key in 'XRP/BTC':
         cexXRP = val['ask']
     if key in 'DASH/BTC':
@@ -114,13 +122,13 @@ for key,val in cexTickers.items():
         cexZEC = val['ask']
     if key in 'XLM/BTC':
         cexXLM = val['ask']
-    #if key in 'XMR/BTC':
+    # if key in 'XMR/BTC':
     cexXMR = float('0')
 
-for key,val in okexTickers.items():
-    
+for key, val in okexTickers.items():
+
     if key in "ETH/BTC":
-       okexETH = val['ask']
+        okexETH = val['ask']
     if key in 'XRP/BTC':
         okexXRP = val['ask']
     if key in 'DASH/BTC':
@@ -133,10 +141,9 @@ for key,val in okexTickers.items():
         okexXMR = val['ask']
 
 
-
-for key,val in poloniexTickers.items():
+for key, val in poloniexTickers.items():
     if key in "ETH/BTC":
-       poloniexETH = val['ask']
+        poloniexETH = val['ask']
     if key in 'XRP/BTC':
         poloniexXRP = val['ask']
     if key in 'DASH/BTC':
@@ -156,11 +163,10 @@ for markets in pairs:
 
     for ex in exchanges:
 
-        marketName = str(ex)+str(market)
+        marketName = str(ex) + str(market)
         marketNames += [(marketName)]
 
-#print(marketNames)
-
+# print(marketNames)
 
 
 """ TODO: Fix this so it's a loop and not a run on if statement...
@@ -187,52 +193,54 @@ def calcSpreads(curr):
     poloniexokex = poloniexSpread / okexSpread"""
 
 # create_market_buy_order(self, symbol, amount, params={})
-def buyOrder(exchange,symbol,amount):
 
-    def buy_binance(symbol,amount):
+
+def buyOrder(exchange, symbol, amount):
+
+    def buy_binance(symbol, amount):
         try:
-            binanceAPI.create_market_buy_order(symbol,amount)
+            binanceAPI.create_market_buy_order(symbol, amount)
         except Exception as err:
             print(err)
 
-    def buy_bittrex(symbol,amount):
+    def buy_bittrex(symbol, amount):
         try:
-            bittrexAPI.create_market_buy_order(symbol,amount)
+            bittrexAPI.create_market_buy_order(symbol, amount)
         except Exception as err:
             print(err)
 
-    def buy_cex(symbol,amount):
+    def buy_cex(symbol, amount):
         try:
-            cexAPI.create_market_buy_order(symbol,amount)
+            cexAPI.create_market_buy_order(symbol, amount)
         except Exception as err:
             print(err)
 
-    def buy_okex(symbol,amount):
+    def buy_okex(symbol, amount):
         try:
-            okexAPI.create_market_buy_order(symbol,amount)
+            okexAPI.create_market_buy_order(symbol, amount)
         except Exception as err:
             print(err)
 
-    def buy_poloniex(symbol,amount):
+    def buy_poloniex(symbol, amount):
         try:
-            poloniexAPI.create_market_buy_order(symbol,amount)
+            poloniexAPI.create_market_buy_order(symbol, amount)
         except Exception as err:
             print(err)
 
     if exchange == 'binance':
-        ret = buy_binance(symbol,amount)
+        ret = buy_binance(symbol, amount)
         return ret
     elif exchange == 'bittrex':
-        ret = buy_bittrex(symbol,amount)
+        ret = buy_bittrex(symbol, amount)
         return ret
     elif exchange == 'cex':
-        ret = buy_cex(symbol,amount)
+        ret = buy_cex(symbol, amount)
         return ret
     elif exchange == 'okex':
-        ret = buy_okex(symbol,amount)
+        ret = buy_okex(symbol, amount)
         return ret
     elif exchange == 'poloniex':
-        ret = buy_poloniex(symbol,amount)
+        ret = buy_poloniex(symbol, amount)
         return ret
     else:
         print('Invalid Exchange')
@@ -250,7 +258,6 @@ def calcSpreads(currency):
     poloniexbinanceETH = poloniexETH / binanceETH
     poloniexokexETH = poloniexETH / okexETH
 
-
     #cexbittrexXMR = cexXMR / bittrexXMR
     #cexbinanceXMR = binanceXMR / cexXMR
     bittrexbinanceXMR = binanceXMR / bittrexXMR
@@ -258,7 +265,7 @@ def calcSpreads(currency):
     #poloniexcexXMR = poloniexXMR / cexXMR
     bittrexpoloniexXMR = bittrexXMR / poloniexXMR
     poloniexbinanceXMR = poloniexXMR / binanceXMR
-    poloniexokexXMR = poloniexXMR / okexXMR 
+    poloniexokexXMR = poloniexXMR / okexXMR
 
     cexbittrexXRP = cexXRP / bittrexXRP
     cexbinanceXRP = binanceXRP / cexXRP
@@ -267,7 +274,7 @@ def calcSpreads(currency):
     poloniexcexXRP = poloniexXRP / cexXRP
     bittrexpoloniexXRP = bittrexXRP / poloniexXRP
     poloniexbinanceXRP = poloniexXRP / binanceXRP
-    poloniexokexXRP = poloniexXRP / okexXRP 
+    poloniexokexXRP = poloniexXRP / okexXRP
 
     cexbittrexZEC = cexZEC / bittrexZEC
     cexbinanceZEC = binanceZEC / cexZEC
@@ -276,7 +283,7 @@ def calcSpreads(currency):
     poloniexcexZEC = poloniexZEC / cexZEC
     bittrexpoloniexZEC = bittrexZEC / poloniexZEC
     poloniexbinanceZEC = poloniexZEC / binanceZEC
-    poloniexokexZEC = poloniexZEC / okexZEC 
+    poloniexokexZEC = poloniexZEC / okexZEC
 
     cexbittrexXLM = cexXLM / bittrexXLM
     cexbinanceXLM = binanceXLM / cexXLM
@@ -285,7 +292,7 @@ def calcSpreads(currency):
     poloniexcexXLM = poloniexXLM / cexXLM
     bittrexpoloniexXLM = bittrexXLM / poloniexXLM
     poloniexbinanceXLM = poloniexXLM / binanceXLM
-    poloniexokexXLM = poloniexXLM / okexXLM 
+    poloniexokexXLM = poloniexXLM / okexXLM
 
     cexbittrexDASH = cexDASH / bittrexDASH
     cexbinanceDASH = binanceDASH / cexDASH
@@ -294,7 +301,7 @@ def calcSpreads(currency):
     poloniexcexDASH = poloniexDASH / cexDASH
     bittrexpoloniexDASH = bittrexDASH / poloniexDASH
     poloniexbinanceDASH = poloniexDASH / binanceDASH
-    poloniexokexDASH = poloniexDASH / okexDASH 
+    poloniexokexDASH = poloniexDASH / okexDASH
 
     if currency == 'ETH':
         print(cexbittrexETH)
@@ -324,25 +331,25 @@ def calcSpreads(currency):
         print(poloniexbinanceDASH)
         print(poloniexokexDASH)
         cexbittrex = cexbittrexDASH
-        cexbinance = cexbinanceDASH 
-        bittrexbinance = bittrexbinanceDASH 
+        cexbinance = cexbinanceDASH
+        bittrexbinance = bittrexbinanceDASH
         okexcex = okexcexDASH
         poloniexcex = poloniexcexDASH
         bittrexpoloniex = bittrexpoloniexDASH
         poloniexbinance = poloniexbinanceDASH
         poloniexokex = poloniexokexDASH
     elif currency == 'XMR':
-        #print(cexbittrexXMR)
-        #print(cexbinanceXMR)
+        # print(cexbittrexXMR)
+        # print(cexbinanceXMR)
         print(bittrexbinanceXMR)
-        #print(okexcexXMR)
-        #print(poloniexcexXMR)
+        # print(okexcexXMR)
+        # print(poloniexcexXMR)
         print(bittrexpoloniexXMR)
         print(poloniexbinanceXMR)
         print(poloniexokexXMR)
         #cexbittrex = cexbittrexXMR
-        #cexbinance = cexbinanceXMR 
-        bittrexbinance = bittrexbinanceXMR 
+        #cexbinance = cexbinanceXMR
+        bittrexbinance = bittrexbinanceXMR
         #okexcex = okexcexXMR
         #poloniexcex = poloniexcexXMR
         bittrexpoloniex = bittrexpoloniexXMR
@@ -358,8 +365,8 @@ def calcSpreads(currency):
         print(poloniexbinanceXRP)
         print(poloniexokexXRP)
         cexbittrex = cexbittrexXRP
-        cexbinance = cexbinanceXRP 
-        bittrexbinance = bittrexbinanceXRP 
+        cexbinance = cexbinanceXRP
+        bittrexbinance = bittrexbinanceXRP
         okexcex = okexcexXRP
         poloniexcex = poloniexcexXRP
         bittrexpoloniex = bittrexpoloniexXRP
@@ -375,8 +382,8 @@ def calcSpreads(currency):
         print(poloniexbinanceXLM)
         print(poloniexokexXLM)
         cexbittrex = cexbittrexXLM
-        cexbinance = cexbinanceXLM 
-        bittrexbinance = bittrexbinanceXLM 
+        cexbinance = cexbinanceXLM
+        bittrexbinance = bittrexbinanceXLM
         okexcex = okexcexXLM
         poloniexcex = poloniexcexXLM
         bittrexpoloniex = bittrexpoloniexXLM
@@ -393,29 +400,41 @@ def calcSpreads(currency):
         print(poloniexbinanceZEC)
         print(poloniexokexZEC)
         cexbittrex = cexbittrexZEC
-        cexbinance = cexbinanceZEC 
-        bittrexbinance = bittrexbinanceZEC 
+        cexbinance = cexbinanceZEC
+        bittrexbinance = bittrexbinanceZEC
         okexcex = okexcexZEC
         poloniexcex = poloniexcexZEC
         bittrexpoloniex = bittrexpoloniexZEC
         poloniexbinance = poloniexbinanceZEC
         poloniexokex = poloniexokexZEC
 
-
     if currency != 'XMR':
-        clist = (cexbittrex,cexbinance,bittrexbinance,okexcex,poloniexcex,bittrexpoloniex,poloniexbinance,poloniexokex)
+        clist = (
+            cexbittrex,
+            cexbinance,
+            bittrexbinance,
+            okexcex,
+            poloniexcex,
+            bittrexpoloniex,
+            poloniexbinance,
+            poloniexokex)
     else:
-        clist = (bittrexbinance,bittrexpoloniex,poloniexbinance,poloniexokex)
+        clist = (
+            bittrexbinance,
+            bittrexpoloniex,
+            poloniexbinance,
+            poloniexokex)
     cr = len(clist)
-    #print(cr)
+    # print(cr)
     average = sum(clist) / int(cr)
     return(average)
 
-#TODO: Implement hedge calculation,
-# Then implement balance logic; If the averager is 
+# TODO: Implement hedge calculation,
+# Then implement balance logic; If the averager is
 # less than (example, TBD) 1.0001, then
-# Check balance of each exchange's wallet. 
+# Check balance of each exchange's wallet.
 # If the wallet contains less than the target ratio, purchase asset.
+
 
 for c in currencies:
     print("\nCurrency: %s\n" % c)
@@ -424,5 +443,5 @@ for c in currencies:
     avg = float(avg)
     if avg < 1.0:
         avg = 1.0 - avg + 1.0
-    #print(avg)
+    # print(avg)
     print('Average: %f ' % avg)

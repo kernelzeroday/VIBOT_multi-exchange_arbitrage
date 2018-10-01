@@ -4,7 +4,8 @@ from sys import exit
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
 
-import requests,time
+import requests
+import time
 import random
 import json
 from decimal import *
@@ -33,23 +34,28 @@ EXCHANGES = {}
 VOLUME = Decimal()
 
 
-def mqPublish(msg,topic='messages'):
+def mqPublish(msg, topic='messages'):
     client = mqtt.Client(client_id="hedgebot", clean_session=False)
     client = mqtt.Client('vihedger')
     client.username_pw_set(username='vibot', password='NmQ5Nj_3MrAwiNDu')
-    client.connect("localhost",1883,60)
+    client.connect("localhost", 1883, 60)
     mq_pass = 'NmQ5Nj_3MrAwiNDu'
     mq_user = 'vibot'
-    mq_port=1883
+    mq_port = 1883
     try:
         #client.publish(topic, str(msg));
-        publish.single(topic, payload=str(msg), hostname=mq_host, port=mq_port, auth = {'username': mq_user, 'password': mq_pass})
+        publish.single(
+            topic,
+            payload=str(msg),
+            hostname=mq_host,
+            port=mq_port,
+            auth={
+                'username': mq_user,
+                'password': mq_pass})
     except Exception as err:
         print(err)
     finally:
-        client.disconnect();
-
-
+        client.disconnect()
 
 
 class Exchange:
@@ -87,19 +93,20 @@ class Exchange:
 class Bittrex(Exchange):
     def __init__(self, name):
         pairs = {
-            "BTC_XRP":  {"name": "BTC-XRP"},
-            "BTC_ETH":  {"name": "BTC-ETH"},
+            "BTC_XRP": {"name": "BTC-XRP"},
+            "BTC_ETH": {"name": "BTC-ETH"},
             "BTC_DASH": {"name": "BTC-DASH"},
-            "BTC_ZEC":  {"name": "BTC-ZEC"},
-            "BTC_XLM":  {"name": "BTC-XLM"},
-            "BTC_LTC":  {"name": "BTC-LTC"},
-            "BTC_XMR":  {"name": "BTC-XMR"},
+            "BTC_ZEC": {"name": "BTC-ZEC"},
+            "BTC_XLM": {"name": "BTC-XLM"},
+            "BTC_LTC": {"name": "BTC-LTC"},
+            "BTC_XMR": {"name": "BTC-XMR"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
 
         # Get market volumes
-        resp = getJSON("https://bittrex.com/api/v1.1/public/getmarketsummaries")
+        resp = getJSON(
+            "https://bittrex.com/api/v1.1/public/getmarketsummaries")
         summary = resp.get("result", False)
         if summary:
             for entry in summary:
@@ -111,17 +118,21 @@ class Bittrex(Exchange):
                     pairs[pair]["volume"] = vol
                     volumeTotal += vol
 
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
 
 class Cex(Exchange):
     def __init__(self, name):
         pairs = {
-            "BTC_XRP":  {"name": "XRP/BTC"},
-            "BTC_ETH":  {"name": "ETH/BTC"},
+            "BTC_XRP": {"name": "XRP/BTC"},
+            "BTC_ETH": {"name": "ETH/BTC"},
             "BTC_DASH": {"name": "DASH/BTC"},
-            "BTC_ZEC":  {"name": "ZEC/BTC"},
-            "BTC_XLM":  {"name": "XLM/BTC"},
+            "BTC_ZEC": {"name": "ZEC/BTC"},
+            "BTC_XLM": {"name": "XLM/BTC"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
@@ -142,18 +153,22 @@ class Cex(Exchange):
                     pairs[pair]["volume"] = vol
                     volumeTotal += vol
 
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
 
 class Poloniex(Exchange):
     def __init__(self, name):
         pairs = {
-            "BTC_XRP":  {"name": "BTC_XRP"},
-            "BTC_ETH":  {"name": "BTC_ETH"},
+            "BTC_XRP": {"name": "BTC_XRP"},
+            "BTC_ETH": {"name": "BTC_ETH"},
             "BTC_DASH": {"name": "BTC_DASH"},
-            "BTC_ZEC":  {"name": "BTC_ZEC"},
-            "BTC_XLM":  {"name": "BTC_STR"},
-            "BTC_LTC":  {"name": "BTC_LTC"},
+            "BTC_ZEC": {"name": "BTC_ZEC"},
+            "BTC_XLM": {"name": "BTC_STR"},
+            "BTC_LTC": {"name": "BTC_LTC"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
@@ -169,24 +184,28 @@ class Poloniex(Exchange):
             )
             pairs[k]["volume"] = vol
             volumeTotal += vol
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
 
 class Binance(Exchange):
     def __init__(self, name):
         pairs = {   # todo: where get required pairs?
-            "BTC_XRP":  {"name": "XRPBTC"},
-            "BTC_ETH":  {"name": "ETHBTC"},
+            "BTC_XRP": {"name": "XRPBTC"},
+            "BTC_ETH": {"name": "ETHBTC"},
             "BTC_DASH": {"name": "DASHBTC"},
-            "BTC_ZEC":  {"name": "ZECBTC"},
-            "BTC_XLM":  {"name": "XLMBTC"},
-            "BTC_LTC":  {"name": "LTCBTC"},
+            "BTC_ZEC": {"name": "ZECBTC"},
+            "BTC_XLM": {"name": "XLMBTC"},
+            "BTC_LTC": {"name": "LTCBTC"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
         tickers = getJSON('https://api.binance.com/api/v1/ticker/24hr')
         if not tickers:
-            #todo: add log here
+            # todo: add log here
             return
         prep_tickers = self._tickers_to_dict(tickers)
         # Get market volumes
@@ -199,7 +218,11 @@ class Binance(Exchange):
             )
             pairs[k]["volume"] = vol
             volumeTotal += vol
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
     def _tickers_to_dict(self, tickers):
         result = {}
@@ -208,35 +231,43 @@ class Binance(Exchange):
         return result
 
     def _pair_symbol_to_ex_style(self, pair):
-        b_curr = pair[3:];q_curr = pair[:3]
-        return "".join([q_curr,b_curr])
+        b_curr = pair[3:]
+        q_curr = pair[:3]
+        return "".join([q_curr, b_curr])
 
 
 class Okex(Exchange):
     def __init__(self, name):
         pairs = {   # todo: where get pairs?
-            "BTC_XRP":  {"name": "XRP/BTC"},
-            "BTC_ETH":  {"name": "ETH/BTC"},
+            "BTC_XRP": {"name": "XRP/BTC"},
+            "BTC_ETH": {"name": "ETH/BTC"},
             "BTC_DASH": {"name": "DASH/BTC"},
-            "BTC_ZEC":  {"name": "ZEC/BTC"},
-            "BTC_XLM":  {"name": "XLM/BTC"},
-            "BTC_LTC":  {"name": "LTC/BTC"},
+            "BTC_ZEC": {"name": "ZEC/BTC"},
+            "BTC_XLM": {"name": "XLM/BTC"},
+            "BTC_LTC": {"name": "LTC/BTC"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
         # Get market volumes
         for k, v in pairs.items():
-            ticker = getJSON('https://www.okex.com/api/v1/ticker.do?symbol=%s' % self._pair_symbol_to_ex_style(k.lower()))  # todo: sync request for each pair, ask Chev if this permissible
+            ticker = getJSON(
+                'https://www.okex.com/api/v1/ticker.do?symbol=%s' %
+                self._pair_symbol_to_ex_style(
+                    k.lower()))  # todo: sync request for each pair, ask Chev if this permissible
             ticker = ticker['ticker']
             if self._check_ticker(ticker) is False:
                 continue
             vol = Decimal(ticker.get("vol", 0)
-            ).quantize(
+                          ).quantize(
                 BTC_PRECISION, rounding=ROUND_DOWN
             )
             pairs[k]["volume"] = vol
             volumeTotal += vol
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
     def _tickers_to_dict(self, tickers: list):
         result = {}
@@ -247,14 +278,13 @@ class Okex(Exchange):
     def _check_ticker(self, ticker):
         expected_keys = ['high', 'vol', 'last', 'low', 'buy', 'sell']
         if not sorted(ticker.keys()) == sorted(expected_keys):
-            #todo: add error log here
+            # todo: add error log here
             return False
         return True
 
     def _pair_symbol_to_ex_style(self, pair):
         b_curr, q_curr = pair.split('_')
-        return "_".join([q_curr.lower(),b_curr.lower()])
-
+        return "_".join([q_curr.lower(), b_curr.lower()])
 
 
 """def printHedge():
@@ -266,24 +296,33 @@ class Okex(Exchange):
         print("%s\t- TOTAL BTC:\t%s (%s %%)" % (
             ExName, Ex.volumeTotal, (Ex.volumeTotal * Decimal('100') / VOLUME).quantize(Decimal('0.01'), rounding=ROUND_DOWN)))"""
 
+
 def pubHedge():
     global VOLUME
     global EXCHANGES
     for ExName, Ex in EXCHANGES.items():
         for PairName, Pair in Ex.pairs.items():
             #print("%s\t- %s\t%s %%" % (ExName, PairName, Pair["hedgeRatio"]))
-            message=('{"exchange" : "%s", "pair" : "%s", "ratio" : "%s"}' % (ExName, PairName, Pair["hedgeRatio"]))
+            message = (
+                '{"exchange" : "%s", "pair" : "%s", "ratio" : "%s"}' %
+                (ExName, PairName, Pair["hedgeRatio"]))
             #pair_ = PairName
             #pair_ = PairName.split('_')
             #pair_ = pair_[1]
             #r = str(Pair["hedgeRatio"])
-            #if pair == pair_:
+            # if pair == pair_:
             #    return('{' + pair_ + ":" + r+'}')
-            mqPublish(message,'hedge')
+            mqPublish(message, 'hedge')
             print(message)
-        print("%s\t- TOTAL BTC:\t%s (%s %%)" % (
-            ExName, Ex.volumeTotal, (Ex.volumeTotal * Decimal('100') / VOLUME).quantize(Decimal('0.01'), rounding=ROUND_DOWN)))
-
+        print(
+            "%s\t- TOTAL BTC:\t%s (%s %%)" %
+            (ExName,
+             Ex.volumeTotal,
+             (Ex.volumeTotal *
+              Decimal('100') /
+              VOLUME).quantize(
+                 Decimal('0.01'),
+                 rounding=ROUND_DOWN)))
 
 
 bit = Bittrex("bittrex")
@@ -299,10 +338,10 @@ mq_pass = 'NmQ5Nj_3MrAwiNDu'
 mq_pubtop = 'messages'
 
 
-#printHedge()
-while 1:
+# printHedge()
+while True:
 
     pubHedge()
     time.sleep(300)
 #ret = getHedge('BTC_LTC')
-#print(ret)
+# print(ret)
