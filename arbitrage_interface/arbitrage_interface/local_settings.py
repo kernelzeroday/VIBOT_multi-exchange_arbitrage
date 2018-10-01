@@ -7,16 +7,34 @@ DEFAULT_CONFIG = get_config()
 
 
 ALLOWS_CONFIG_ELEMENTS = {
-    'exchanges':['poloniex','okex','bitfinex','binance','bittrex','tidex','hitbtc','tidex','idex','bx.in.th'],
-    'pairs':['BTCUSD','ETHBTC','LTCBTC','ZRXBTC','ADABTC','REMBTC','VIBBTC','LSKBTC','EOSBTC']
-}
+    'exchanges': [
+        'poloniex',
+        'okex',
+        'bitfinex',
+        'binance',
+        'bittrex',
+        'tidex',
+        'hitbtc',
+        'tidex',
+        'idex',
+        'bx.in.th'],
+    'pairs': [
+        'BTCUSD',
+        'ETHBTC',
+        'LTCBTC',
+        'ZRXBTC',
+        'ADABTC',
+        'REMBTC',
+        'VIBBTC',
+        'LSKBTC',
+        'EOSBTC']}
 
 
 ENGINES_MAP = {
-    'vi1':['scrapper', 'order_engine'],
-    'vi2':['balance_engine',],
-    'vi3':['order_tracking_engine',],
-    'vi4':['transfer',]
+    'vi1': ['scrapper', 'order_engine'],
+    'vi2': ['balance_engine', ],
+    'vi3': ['order_tracking_engine', ],
+    'vi4': ['transfer', ]
 }
 
 

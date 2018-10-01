@@ -28,7 +28,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     url('admin/', admin.site.urls),
     url(r'^admin/', admin.site.urls),
-    url(r'^', include(('main_app.urls','main_app'), namespace='main_app')),
+    url(r'^', include(('main_app.urls', 'main_app'), namespace='main_app')),
     url(r'^accounts/', include(('account_app.urls', 'account_app'), namespace='account_app')),
     url(r'^stream/', include(('stream_app.urls', 'stream_app'), namespace='stream_app'))
 

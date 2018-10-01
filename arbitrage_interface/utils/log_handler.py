@@ -12,7 +12,7 @@ def log_handler(msg, type='info', **log):
         logging.warning(log)
     elif type == 'error':
         logging.error(log)
-    #todo: add your log type here..
+    # todo: add your log type here..
     else:
         logging.info(log)
     return log

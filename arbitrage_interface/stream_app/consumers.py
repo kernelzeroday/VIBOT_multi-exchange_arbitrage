@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 
 
 class WSStreamCunsomer(AsyncJsonWebsocketConsumer):
-    ##### MMQT event to WSS
+    # MMQT event to WSS
 
     async def connect(self):
         """
@@ -34,7 +34,7 @@ class WSStreamCunsomer(AsyncJsonWebsocketConsumer):
             await self.send_json({"error": e.code})
 
 
-class MMQTStreamCunsomer(AsyncJsonWebsocketConsumer):   #todo: Sync
+class MMQTStreamCunsomer(AsyncJsonWebsocketConsumer):  # todo: Sync
     async def connect(self):
         self.mqStart(MQ_SUBTOP)
 
@@ -69,8 +69,13 @@ class MMQTStreamCunsomer(AsyncJsonWebsocketConsumer):   #todo: Sync
         self.client = client
         return client
 
-
-    def mqPublish(self, id, payload, topic='engine_manager', qos=0, retain=False):
+    def mqPublish(
+            self,
+            id,
+            payload,
+            topic='engine_manager',
+            qos=0,
+            retain=False):
         """ MQTT Publish Message to a Topic
         :param id           String of the Client ID
         :param topic:       String of the message topic
@@ -89,7 +94,6 @@ class MMQTStreamCunsomer(AsyncJsonWebsocketConsumer):   #todo: Sync
             raise ValueError("Could not find an MQTT Client matching %s" % id)
         client.publish(topic, payload=payload, qos=qos, retain=retain)
 
-
     def mqDisconnect(self, client, userdata, rc):
         """ MQTT Connect Event Listener
         :param client:      Client instance
@@ -102,7 +106,6 @@ class MMQTStreamCunsomer(AsyncJsonWebsocketConsumer):   #todo: Sync
             print("Disconnected")
         else:
             print("Error: Unexpected Disconnection")
-
 
     def mqConnect(self, client, userdata, flags, rc):
         """ MQTT Connect Event Listener
@@ -137,12 +140,9 @@ class MMQTStreamCunsomer(AsyncJsonWebsocketConsumer):   #todo: Sync
                             }
         """
         if "/engine_manager" in message.topic:
-            #todo: handle answer here
+            # todo: handle answer here
             pass
         self.update(message)
-
-
-
 
 
 class ClientError(Exception):
@@ -150,6 +150,7 @@ class ClientError(Exception):
     Custom exception class that is caught by the websocket receive()
     handler and translated into a send back to the client.
     """
+
     def __init__(self, code):
         super().__init__(code)
         self.code = code

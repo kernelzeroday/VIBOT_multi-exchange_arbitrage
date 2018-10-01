@@ -59,8 +59,7 @@ ROOT_URLCONF = 'arbitrage_interface.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,7 +75,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'arbitrage_interface.wsgi.application'
 
 
-##### Channels-specific settings
+# Channels-specific settings
 
 redis_host = os.environ.get('REDIS_HOST', 'localhost')
 
@@ -84,7 +83,8 @@ redis_host = os.environ.get('REDIS_HOST', 'localhost')
 # http://channels.readthedocs.io/en/latest/topics/channel_layers.html
 CHANNEL_LAYERS = {
     "default": {
-        # This example app uses the Redis channel layer implementation channels_redis
+        # This example app uses the Redis channel layer implementation
+        # channels_redis
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [(redis_host, 6379)],
@@ -151,8 +151,4 @@ STATICFILES_DIRS = (
 )
 
 
-
-
-
 from .local_settings import *
-
