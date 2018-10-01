@@ -12,7 +12,7 @@ import json
 from decimal import *
 from collections import namedtuple
 # 3rd Party
-#import okex from ccxt as OkexAPI
+# import okex from ccxt as OkexAPI
 from ccxt import okex as OkexAPI
 from ccxt import binance as binanceAPI
 import ccxt
@@ -28,14 +28,21 @@ import config
 DEBUG = False
 LIVE = True
 ORDERBACK = True
-INTERACTIVE = os.environ.get('PYTHONINSPECT', False) or hasattr(sys, "ps1") or hasattr(sys, "ps2") or False
+INTERACTIVE = os.environ.get(
+    'PYTHONINSPECT',
+    False) or hasattr(
+        sys,
+        "ps1") or hasattr(
+            sys,
+    "ps2") or False
 BTC_PRECISION = Decimal('0.00000001')
 #PAIR_ARR = ["BTC_XRP", "BTC_ETH", "BTC_DASH", "BTC_ZEC", "BTC_XLM", "BTC_LTC", "BTC_ETC", "BTC_XMR", "BTC_LSK", "BTC_NEO", "ETH_OMG", "ETH_ETC", "ETH_GNT", "BTC_OMG"]
 PAIR_ARR = pairInfo.PAIR_ARR
 #SUBSCRIPTIONS = [("/spread"+v, 0) for v in PAIR_ARR]
-#SUBSCRIPTIONS = [("/spread/#")]
-SUBSCRIPTIONS = [("/spread/"+v, 0) for v in PAIR_ARR]
-SUBSCRIPTIONS += [("pbal2", 0), ("cbal2", 0), ("bbal2", 0), ("binbal2", 0), ("okbal2", 0), ('balance/net', 0)]
+# SUBSCRIPTIONS = [("/spread/#")]
+SUBSCRIPTIONS = [("/spread/" + v, 0) for v in PAIR_ARR]
+SUBSCRIPTIONS += [("pbal2", 0), ("cbal2", 0), ("bbal2", 0),
+                  ("binbal2", 0), ("okbal2", 0), ('balance/net', 0)]
 LASTPROCESSED = {}
 
 CURRENCIES = {}
@@ -46,7 +53,7 @@ CLIENTS = {}
 global NET
 VOLUME = Decimal()
 
-#grab binance market data
+# grab binance market data
 binance = ccxt.binance()
 cex = ccxt.cex()
 bittrex = ccxt.bittrex()
@@ -67,7 +74,6 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(o)
 
 
-
 def getJSON(url):
     try:
         r = requests.get(url)
@@ -84,11 +90,12 @@ def getJSON(url):
                 return res
     return False
 
-def pubprint(data,topic='messages'):
 
-    data_ = str("{'TRADE': "+str(data)+" }")
+def pubprint(data, topic='messages'):
+
+    data_ = str("{'TRADE': " + str(data) + " }")
     try:
-        mqPublish(id='trade',payload=data_, topic=topic)
+        mqPublish(id='trade', payload=data_, topic=topic)
     except Exception as err:
         pass
     print(data)
@@ -113,7 +120,9 @@ class Currency:
             available += bal.available
             pending += bal.total - bal.available
             total += bal.total
-        msg = ("Total: %s (%s Available, %s Pending)" % (total, available, pending))
+        msg = (
+            "Total: %s (%s Available, %s Pending)" %
+            (total, available, pending))
         pubprint(msg)
 
 
@@ -126,7 +135,8 @@ class Pair:
         global CURRENCIES
         parts = name.split("_")
         if len(parts) != 2:
-            raise ValueError("Pair name must be in the format <baseCurrency>_<quoteCurrency>")
+            raise ValueError(
+                "Pair name must be in the format <baseCurrency>_<quoteCurrency>")
         self.name = name
         self.base = CURRENCIES.get(parts[0], False) or Currency(parts[0])
         self.quote = CURRENCIES.get(parts[1], False) or Currency(parts[1])
@@ -138,13 +148,15 @@ class Net:
     def __init__(self):
         global NET
         self.net = Decimal(0)
-    def update(self,val):
+
+    def update(self, val):
         self.net = val
         print('Updated Net Balance to ' + str(val))
 
     def get(self):
         net = self.net
         return net
+
 
 class Balance:
     def __init__(self, exchange, currency=""):
@@ -165,7 +177,7 @@ class Balance:
         self.reserved = Decimal(0)
 
         self.currency.balances[self.name] = self
-        
+
         BALANCES[self.name] = self
 
     def update(self, available, pending):
@@ -176,8 +188,13 @@ class Balance:
             self.Total_ = available + pending
 
             if not INTERACTIVE:
-                pubprint("Updated %s %s Balance to: %s Available, %s Pending, %s Total" % (
-                    self.exchange.name, self.currency.name, self.available, self.pending, self.total))
+                pubprint(
+                    "Updated %s %s Balance to: %s Available, %s Pending, %s Total" %
+                    (self.exchange.name,
+                     self.currency.name,
+                     self.available,
+                     self.pending,
+                     self.total))
 #                mqPublish('trade',msg_, topic='messages')
 
     def get(self):
@@ -191,7 +208,13 @@ class Balance:
 
 
 class Exchange:
-    def __init__(self, name, pairs, inversePairs={}, volumeTotal=Decimal(), fee=Decimal("0.0025")):
+    def __init__(
+            self,
+            name,
+            pairs,
+            inversePairs={},
+            volumeTotal=Decimal(),
+            fee=Decimal("0.0025")):
         global EXCHANGES
         global VOLUME
         global PAIRS
@@ -236,8 +259,9 @@ class Exchange:
             if remainder:
                 randKey = random.choice(list(self.pairs.keys()))
                 self.pairs[randKey]["hedgeRatio"] += remainder
-                pubprint("%s: Assigned hedge remainder (%s%%) randomly to %s" % (
-                    self.name, remainder, randKey))
+                pubprint(
+                    "%s: Assigned hedge remainder (%s%%) randomly to %s" %
+                    (self.name, remainder, randKey))
 
         EXCHANGES[self.name] = self
 
@@ -252,16 +276,22 @@ class Exchange:
         """
         pair = self.pairs.get(self.inversePairs.get(invPair, False), False)
         if not pair:
-            raise ValueError("Could not find pair %s on %s" % (invPair, self.name))
+            raise ValueError(
+                "Could not find pair %s on %s" %
+                (invPair, self.name))
 
         pairName = pair.get("name", False)
         if not pairName:
-            raise ValueError("Pair name not defined for %s on %s" % (invPair, self.name))
+            raise ValueError(
+                "Pair name not defined for %s on %s" %
+                (invPair, self.name))
 
         qtyPrecision = pair.get("qtyPrecision")
         pricePrecision = pair.get("pricePrecision")
         if not (qtyPrecision and pricePrecision):
-            raise ValueError("Missing Qty Precision or Price Precision for %s %s" % (self.name, pairName))
+            raise ValueError(
+                "Missing Qty Precision or Price Precision for %s %s" %
+                (self.name, pairName))
 
         # Quantize Values
         qty = Decimal(qty).quantize(qtyPrecision, rounding=ROUND_DOWN)
@@ -283,26 +313,38 @@ class Exchange:
 
         balance = self.balances.get(currency, False)
         if not balance:
-            raise ValueError("Could not find balance for %s on %s" % (currency, self.name))
+            raise ValueError(
+                "Could not find balance for %s on %s" %
+                (currency, self.name))
 
         available = balance.get()
         if float(available) >= float(qty):
             pass
         elif float(available) > float(0.0):
-            pubprint("Qty changed for %s %s order due to lack of funds. From %s to %s" % (self.name, side, qty, available))
+            pubprint(
+                "Qty changed for %s %s order due to lack of funds. From %s to %s" %
+                (self.name, side, qty, available))
             qty = available
         else:
-            raise ValueError("No %s available on %s (%s reserved, %s pending, %s total)" % (currency, self.name, balance.reserved, balance.pending, balance.total))
+            raise ValueError(
+                "No %s available on %s (%s reserved, %s pending, %s total)" %
+                (currency, self.name, balance.reserved, balance.pending, balance.total))
         if side == "buy":
             # Switch qty back
-             qty = (Decimal(qty) / price).quantize(qtyPrecision, rounding=ROUND_DOWN)
+            qty = (
+                Decimal(qty) /
+                price).quantize(
+                qtyPrecision,
+                rounding=ROUND_DOWN)
 
         # Check minimum order qtys and values
         minType = pair.get("minType", False)
         if not minType:
-            raise ValueError("Could not find minType for %s %s" % (self.name, pairName))
+            raise ValueError(
+                "Could not find minType for %s %s" %
+                (self.name, pairName))
             minType == 'ccxt'
-        """ Fixed This so that it actually works... Quantize...  
+        """ Fixed This so that it actually works... Quantize...
             val = (qty * price).quantize(pricePrecision, rounding=ROUND_DOWN) """
         if minType == "ccxt":
             minQty = 0.0
@@ -330,14 +372,18 @@ class Exchange:
                 ccxtname = pairName.split('/')
                 ccxtname = '/'.join(ccxtname)
                 pairmarket = marketdata[self.name]
-            
+
             for i in pairmarket:
                 if i['symbol'] == ccxtname:
                     minQty = i['limits']['amount']['min']
             if not minQty:
-                    raise ValueError("ERROR: could not find minQty for %s %s" % (self.name, ccxtname))
+                raise ValueError(
+                    "ERROR: could not find minQty for %s %s" %
+                    (self.name, ccxtname))
             if Decimal(qty) < Decimal(minQty):
-                    raise ValueError("Error: The requested %s order qty (%s) is too low for %s (%s)" % (pairName, qty, self.name, minQty))
+                raise ValueError(
+                    "Error: The requested %s order qty (%s) is too low for %s (%s)" %
+                    (pairName, qty, self.name, minQty))
         return (balance, price, qty, ratio)
 
     def updateBalance(self, currency, available, pending):
@@ -345,13 +391,20 @@ class Exchange:
         if bal:
             bal.update(available, pending)
 
-    def buy(self, pair, price, qty, kind="Arbitrage", orderID="", reference=""):
+    def buy(
+            self,
+            pair,
+            price,
+            qty,
+            kind="Arbitrage",
+            orderID="",
+            reference=""):
 
         # On completion publish message
         now = time.time()
         expires = 0
-        later = random.randint(30,60)
-        even_later = random.randint(30,90)
+        later = random.randint(30, 60)
+        even_later = random.randint(30, 90)
         if kind == "Arbitrage":
             expires = now + later
         elif kind == 'Limit':
@@ -375,18 +428,25 @@ class Exchange:
             print(msg)
         return True
 
-    def sell(self, pair, price, qty, kind="Arbitrage", orderID="", reference=""):
+    def sell(
+            self,
+            pair,
+            price,
+            qty,
+            kind="Arbitrage",
+            orderID="",
+            reference=""):
         # On completion publish message
         now = time.time()
         expires = 0
-        later = random.randint(15,30)
-        even_later = random.randint(30,90)
+        later = random.randint(15, 30)
+        even_later = random.randint(30, 90)
         if kind == "Limit":
             expires = now + even_later
         elif kind == "Arbitrage":
             expires = now + later
         else:
-            print('ERROR: Invalid Order Type'+ str(kind))
+            print('ERROR: Invalid Order Type' + str(kind))
         msg = json.dumps({
             "Exchange": self.name,
             "Pair": pair,
@@ -407,7 +467,6 @@ class Exchange:
         return True
 
 
-
 class Bittrex(Exchange):
     def __init__(self, pairs=[]):
         self.api = BittrexAPI.bittrex(config.bittrexKey, config.bittrexSecret)
@@ -425,7 +484,8 @@ class Bittrex(Exchange):
         volumeTotal = Decimal()
 
         # Get market volumes
-        resp = getJSON("https://bittrex.com/api/v1.1/public/getmarketsummaries")
+        resp = getJSON(
+            "https://bittrex.com/api/v1.1/public/getmarketsummaries")
         summary = resp.get("result", False)
         if summary:
             for entry in summary:
@@ -437,7 +497,11 @@ class Bittrex(Exchange):
                     pairs[pair]["volume"] = vol
                     volumeTotal += vol
 
-        super().__init__("bittrex", pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            "bittrex",
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
     def updateBalance(self, vals):
         # Parse vals
@@ -470,8 +534,8 @@ class Bittrex(Exchange):
             print("Bittrex Error Calling API.buylimit(): %s" % err)
             return False
         else:
-            if not res.get("success", False): 
-                #msg = res[res.index("message"), ""] 
+            if not res.get("success", False):
+                #msg = res[res.index("message"), ""]
                 msg = res.get("message", "")
                 print("Bittrex Buy Order Placement Failed: %s" % msg)
                 return False
@@ -480,7 +544,8 @@ class Bittrex(Exchange):
             if orderID:
                 return super().buy(pair, price, qty, kind=kind, orderID=orderID)
             else:
-                print("Bittrex Buy Order Warning: No orderID returned but API claims was successful!")
+                print(
+                    "Bittrex Buy Order Warning: No orderID returned but API claims was successful!")
 
     def sell(self, pair, price, qty, kind="Arbitrage"):
         try:
@@ -505,14 +570,16 @@ class Bittrex(Exchange):
             if orderID:
                 return super().sell(pair, price, qty, kind=kind, orderID=orderID)
             else:
-                print("Bittrex Sell Order Warning: No orderID returned but API claims was successful!")
+                print(
+                    "Bittrex Sell Order Warning: No orderID returned but API claims was successful!")
+
 
 class Okex(Exchange):
     def __init__(self, pairs=[]):
         okex.apiKey = config.okexKey
         okex.secret = config.okexSecret
         self.currencyMap = {
-          #  "STR": "XLM",
+            #  "STR": "XLM",
         }
 
         thisPairs = {}
@@ -537,8 +604,12 @@ class Okex(Exchange):
             ))
             pairs[p]["volume"] = vol
             volumeTotal += vol
-        super().__init__("okex", pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
-        
+        super().__init__(
+            "okex",
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
+
     def updateBalance(self, vals):
         # Parse vals
         try:
@@ -548,12 +619,13 @@ class Okex(Exchange):
             print('Error in okex balance')
             pass
         except Exception as err:
-            print('Unknown error in okex: '+str(err))
+            print('Unknown error in okex: ' + str(err))
             pass
         else:
             for currency, data in res.items():
                 if isinstance(data, dict):
-                    currency = self.currencyMap.get(currency, currency)  # Map for STR -> XLM
+                    currency = self.currencyMap.get(
+                        currency, currency)  # Map for STR -> XLM
                     available = data.get("available", Decimal())
                     pending = data.get("pending", Decimal())
                     super().updateBalance(currency, available, pending)
@@ -564,7 +636,7 @@ class Okex(Exchange):
         pairname = '/'.join(pairname)
 
         try:
-            res = okex.createLimitBuyOrder (pairname, qty, price)
+            res = okex.createLimitBuyOrder(pairname, qty, price)
         except Exception as err:
             print("Binance Error Calling API.buy(): %s" % err)
             return False
@@ -573,7 +645,8 @@ class Okex(Exchange):
             if not orderID:
                 print("Okex Buy Order Placement Failed")
                 return False
-            # Pass relevant info for tracking and logging via this method's super method (existing in the Exchange class)
+            # Pass relevant info for tracking and logging via this method's
+            # super method (existing in the Exchange class)
             else:
                 return super().buy(pair, price, qty, kind=kind, orderID=orderID)
 
@@ -582,7 +655,7 @@ class Okex(Exchange):
         pairname.reverse()
         pairname = '/'.join(pairname)
         try:
-            res = okex.createLimitSellOrder (pairname, qty, price)
+            res = okex.createLimitSellOrder(pairname, qty, price)
             """
             :returns dict
             As above with "type":"sell"
@@ -595,12 +668,10 @@ class Okex(Exchange):
             if not orderID:
                 print("Okex Sell Order Placement Failed")
                 return False
-            # Pass relevant info for tracking and logging via this method's super method (existing in the Exchange class)
+            # Pass relevant info for tracking and logging via this method's
+            # super method (existing in the Exchange class)
             else:
                 return super().sell(pair, price, qty, kind=kind, orderID=orderID)
-
-
-
 
 
 class Binance(Exchange):
@@ -624,7 +695,7 @@ class Binance(Exchange):
             raise ValueError("Could not find any pairs")
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
-        
+
         tickers = []
         for p in pairs:
             pairname = pair['name'].split('-')
@@ -636,8 +707,12 @@ class Binance(Exchange):
             ))
             pairs[p]["volume"] = vol
             volumeTotal += vol
-        super().__init__("binance", pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
-        
+        super().__init__(
+            "binance",
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
+
     def updateBalance(self, vals):
         # Parse vals
         try:
@@ -647,12 +722,13 @@ class Binance(Exchange):
             print('Error in binance balance')
             pass
         except Exception as err:
-            print('Unknown error in binance: '+str(err))
+            print('Unknown error in binance: ' + str(err))
             pass
         else:
             for currency, data in res.items():
                 if isinstance(data, dict):
-                    currency = self.currencyMap.get(currency, currency)  # Map for STR -> XLM
+                    currency = self.currencyMap.get(
+                        currency, currency)  # Map for STR -> XLM
                     available = data.get("available", Decimal())
                     pending = data.get("pending", Decimal())
                     super().updateBalance(currency, available, pending)
@@ -675,7 +751,8 @@ class Binance(Exchange):
             if not orderID:
                 print("Binance Buy Order Placement Failed")
                 return False
-            # Pass relevant info for tracking and logging via this method's super method (existing in the Exchange class)
+            # Pass relevant info for tracking and logging via this method's
+            # super method (existing in the Exchange class)
             else:
                 return super().buy(pair, price, qty, kind=kind, orderID=orderID)
 
@@ -699,11 +776,10 @@ class Binance(Exchange):
             if not orderID:
                 print("Binance Sell Order Placement Failed")
                 return False
-            # Pass relevant info for tracking and logging via this method's super method (existing in the Exchange class)
+            # Pass relevant info for tracking and logging via this method's
+            # super method (existing in the Exchange class)
             else:
                 return super().sell(pair, price, qty, kind=kind, orderID=orderID)
-
-
 
 
 class Cex(Exchange):
@@ -728,7 +804,7 @@ class Cex(Exchange):
         try:
             tickers = resp.get("data", False)
         except Exception as err:
-            print('Error ' +str(err))
+            print('Error ' + str(err))
             sys.exit(1)
             #tickers = []
         if tickers:
@@ -744,7 +820,12 @@ class Cex(Exchange):
                     pairs[pair]["volume"] = vol
                     volumeTotal += vol
 
-        super().__init__("cex", pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal, fee=Decimal("0.0015"))
+        super().__init__(
+            "cex",
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal,
+            fee=Decimal("0.0015"))
 
     def updateBalance(self, vals):
         # Parse vals
@@ -817,7 +898,8 @@ class Cex(Exchange):
 
 class Poloniex(Exchange):
     def __init__(self, pairs=[]):
-        self.api = PoloniexAPI.Poloniex(config.poloniexKey, config.poloniexSecret)
+        self.api = PoloniexAPI.Poloniex(
+            config.poloniexKey, config.poloniexSecret)
         self.currencyMap = {
             "STR": "XLM",
         }
@@ -845,7 +927,11 @@ class Poloniex(Exchange):
             )
             pairs[k]["volume"] = vol
             volumeTotal += vol
-        super().__init__("poloniex", pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            "poloniex",
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
     def updateBalance(self, vals):
         # Parse vals
@@ -857,7 +943,8 @@ class Poloniex(Exchange):
         else:
             for currency, data in res.items():
                 if isinstance(data, dict):
-                    currency = self.currencyMap.get(currency, currency)  # Map for STR -> XLM
+                    currency = self.currencyMap.get(
+                        currency, currency)  # Map for STR -> XLM
                     available = data.get("available", Decimal())
                     pending = data.get("pending", Decimal())
                     super().updateBalance(currency, available, pending)
@@ -893,7 +980,8 @@ class Poloniex(Exchange):
             if not orderID:
                 print("Poloniex Buy Order Placement Failed")
                 return False
-            # Pass relevant info for tracking and logging via this method's super method (existing in the Exchange class)
+            # Pass relevant info for tracking and logging via this method's
+            # super method (existing in the Exchange class)
             return super().buy(pair, price, qty, kind=kind, orderID=orderID)
 
     def sell(self, pair, price, qty, kind="Arbitrage"):
@@ -911,8 +999,10 @@ class Poloniex(Exchange):
             if not orderID:
                 print("Poloniex Sell Order Placement Failed")
                 return False
-            # Pass relevant info for tracking and logging via this method's super method (existing in the Exchange class)
+            # Pass relevant info for tracking and logging via this method's
+            # super method (existing in the Exchange class)
             return super().sell(pair, price, qty, kind=kind, orderID=orderID)
+
 
 def percentage(percent, whole):
     if percent == 0.0:
@@ -920,7 +1010,7 @@ def percentage(percent, whole):
     else:
         try:
             return (percent * whole) / 100.0
-        except:
+        except BaseException:
             return(0.0)
 
 
@@ -931,13 +1021,35 @@ def parseSpreads(pair, spreads):
     global ORDERBACK
     global EXCHANGES
     #BUYBACK = SELLBACK = False
-    Spread = namedtuple('Spread', ['Name', 'BuyFrom', 'BuyPrice', 'BuyQty', 'BuyFee',
-                                   'SellTo', 'SellPrice', 'SellQty', 'SellFee',
-                                   'Value', 'EMA', 'EMVAR', 'Score',
-                                   'EMAMaxPos', 'EMAAge', 'TimeStart',
-                                   'LastUpdate', 'Type', 'Count', 'EMARate', 'TimeLast'])
+    Spread = namedtuple('Spread',
+                        ['Name',
+                         'BuyFrom',
+                         'BuyPrice',
+                         'BuyQty',
+                         'BuyFee',
+                         'SellTo',
+                         'SellPrice',
+                         'SellQty',
+                         'SellFee',
+                         'Value',
+                         'EMA',
+                         'EMVAR',
+                         'Score',
+                         'EMAMaxPos',
+                         'EMAAge',
+                         'TimeStart',
+                         'LastUpdate',
+                         'Type',
+                         'Count',
+                         'EMARate',
+                         'TimeLast'])
     try:
-        spreads = json.loads(spreads, object_hook=lambda x: Spread(**x), parse_int=Decimal, parse_float=Decimal)
+        spreads = json.loads(
+            spreads,
+            object_hook=lambda x: Spread(
+                **x),
+            parse_int=Decimal,
+            parse_float=Decimal)
     except json.JSONDecodeError:
         print("JSON decode error")
         return
@@ -955,25 +1067,33 @@ def parseSpreads(pair, spreads):
                 continue
             buyEx = EXCHANGES.get(spread.BuyFrom, False)
             sellEx = EXCHANGES.get(spread.SellTo, False)
-            
+
             if not (buyEx and sellEx):
                 print("Couldn't find exchanges %s or %s" % (buyEx, sellEx))
-                LASTPROCESSED[spread.Name] = Decimal((time.time() + 0.1)*1000000000)
+                LASTPROCESSED[spread.Name] = Decimal(
+                    (time.time() + 0.1) * 1000000000)
                 continue
             buyPair = buyEx.pairs.get(pair, {}).get("name", False)
             sellPair = sellEx.pairs.get(pair, {}).get("name", False)
             if not (buyPair and sellPair):
-                print("Couldn't find %s inverse pairs %s or %s" % ( pair, buyPair, sellPair))
-                LASTPROCESSED[spread.Name] = Decimal((time.time() + 0.1)*1000000000)
+                print(
+                    "Couldn't find %s inverse pairs %s or %s" %
+                    (pair, buyPair, sellPair))
+                LASTPROCESSED[spread.Name] = Decimal(
+                    (time.time() + 0.1) * 1000000000)
                 continue
             try:
-                buyBal, buyPrice, buyQty, ratio = buyEx.checkBalance("buy", buyPair, spread.BuyPrice, spread.BuyQty)
-                sellBal, sellPrice, sellQty, ratio = sellEx.checkBalance("sell", sellPair, spread.SellPrice, spread.SellQty)
+                buyBal, buyPrice, buyQty, ratio = buyEx.checkBalance(
+                    "buy", buyPair, spread.BuyPrice, spread.BuyQty)
+                sellBal, sellPrice, sellQty, ratio = sellEx.checkBalance(
+                    "sell", sellPair, spread.SellPrice, spread.SellQty)
                 # Cross Check
                 if Decimal(sellQty) < Decimal(buyQty):
-                    buyBal, buyPrice, buyQty, ratio = buyEx.checkBalance("buy", buyPair, buyPrice, sellQty)
+                    buyBal, buyPrice, buyQty, ratio = buyEx.checkBalance(
+                        "buy", buyPair, buyPrice, sellQty)
                 elif Decimal(buyQty) < Decimal(sellQty):
-                    sellBal, sellPrice, sellQty, ratio = sellEx.checkBalance("sell", sellPair, sellPrice, buyQty)
+                    sellBal, sellPrice, sellQty, ratio = sellEx.checkBalance(
+                        "sell", sellPair, sellPrice, buyQty)
             except ValueError as err:
                 pubprint("Error computing balances: %s\n" % err)
             else:
@@ -981,25 +1101,23 @@ def parseSpreads(pair, spreads):
                 # Reserve this qty for the following trades
                 buyBal.reserved = Decimal(buyBal.reserved)
                 sellBal.reserved = Decimal(sellBal.reserved)
-                #try:
+                # try:
                 #    buyRes = buyBal.Total_
                 #    sellRes = sellBal.Total_
-                #except:
+                # except:
                 #    pass
                 buyBal.reserved += Decimal(buyQty)
                 sellBal.reserved += Decimal(sellQty)
-
-
 
                 # Place the orders
                 """ Arb Trades (Should be market orders, ie Taker Fees)
                 With Instant Market Rebalance (Should be limit orders, ie Maker Fees)"""
                 BUYBACK = SELLBACK = False
                 if LIVE:
-                  #if (Decimal(sellQty) * Decimal(sellPrice)) <= Decimal(0.0001):
+                  # if (Decimal(sellQty) * Decimal(sellPrice)) <= Decimal(0.0001):
                   #print('Discarding trade, qty too low')
-                  #return False
-                  #else:
+                  # return False
+                  # else:
                     # Arb Sell
                     if sellEx.sell(sellPair, sellPrice, sellQty):
                         BUYBACK = True
@@ -1019,7 +1137,7 @@ def parseSpreads(pair, spreads):
 
                     # Arb buy
                         if buyEx.buy(buyPair, buyPrice, buyQty):
-                            SELLBACK=True
+                            SELLBACK = True
                             """try:
                                 pubprint('BuyEx Ratio : '+str(ratio))
                             except:
@@ -1035,8 +1153,12 @@ def parseSpreads(pair, spreads):
                                     SELLBACK = True"""
 
                 else:
-                    debugPrint("%s Sold %s %s at %s" % (sellEx.name, sellQty, sellPair, sellPrice))
-                    debugPrint("%s Bought %s %s at %s" % (buyEx.name, buyQty, buyPair, buyPrice))
+                    debugPrint(
+                        "%s Sold %s %s at %s" %
+                        (sellEx.name, sellQty, sellPair, sellPrice))
+                    debugPrint(
+                        "%s Bought %s %s at %s" %
+                        (buyEx.name, buyQty, buyPair, buyPrice))
                     BUYBACK = SELLBACK = True
 
                 if ORDERBACK and (BUYBACK or SELLBACK):
@@ -1046,34 +1168,44 @@ def parseSpreads(pair, spreads):
                     sellBackQty = (sellQty * (Decimal('1') - buyEx.fee))
 
                     try:
-                        sellBackBal, sellBackPrice, sellBackQty, ratio = buyEx.checkBalance("sell", buyPair, sellBackPrice, sellBackQty)
-                        buyBackBal, buyBackPrice, buyBackQty, ratio  = sellEx.checkBalance("buy", sellPair, buyBackPrice, buyBackQty)
+                        sellBackBal, sellBackPrice, sellBackQty, ratio = buyEx.checkBalance(
+                            "sell", buyPair, sellBackPrice, sellBackQty)
+                        buyBackBal, buyBackPrice, buyBackQty, ratio = sellEx.checkBalance(
+                            "buy", sellPair, buyBackPrice, buyBackQty)
                         # Cross Check
                         if buyBackQty < sellBackQty:
-                            sellBackBal, sellBackPrice, sellBackQty, ratio = buyEx.checkBalance("sell", buyPair, sellBackPrice, buyBackQty)
+                            sellBackBal, sellBackPrice, sellBackQty, ratio = buyEx.checkBalance(
+                                "sell", buyPair, sellBackPrice, buyBackQty)
                         elif sellBackQty < buyBackQty:
-                            buyBackBal, buyBackPrice, buyBackQty, ratio = sellEx.checkBalance("buy", sellPair, buyBackPrice, sellBackQty)
+                            buyBackBal, buyBackPrice, buyBackQty, ratio = sellEx.checkBalance(
+                                "buy", sellPair, buyBackPrice, sellBackQty)
 
                     except ValueError as err:
                         print("Error computing orderback balances: %s\n" % err)
                     else:
                         if BUYBACK:
                             buyBackBal.reserved += buyBackQty
-                            if LIVE and  BUYBACK:
-                                sellEx.buy(sellPair, buyBackPrice, buyBackQty, kind="Limit")
+                            if LIVE and BUYBACK:
+                                sellEx.buy(
+                                    sellPair, buyBackPrice, buyBackQty, kind="Limit")
                                 buyBackBal.available -= buyBackQty
                                 buyBackBal.reserved -= buyBackQty
                             else:
-                                debugPrint("%s Buy Order Placed for %s %s at %s" % (sellEx.name, buyBackQty, sellPair, buyBackPrice))
+                                debugPrint(
+                                    "%s Buy Order Placed for %s %s at %s" %
+                                    (sellEx.name, buyBackQty, sellPair, buyBackPrice))
 
                         if SELLBACK:
                             sellBackBal.reserved += sellBackQty
                             if LIVE and SELLBACK:
-                                buyEx.sell(buyPair, sellBackPrice, sellBackQty, kind="Limit")
+                                buyEx.sell(
+                                    buyPair, sellBackPrice, sellBackQty, kind="Limit")
                                 sellBackBal.available -= sellBackQty
                                 sellBackBal.reserved -= sellBackQty
                             else:
-                                    debugPrint("%s Sell Order Placed for %s %s at %s" % (buyEx.name, sellBackQty, buyPair, sellBackPrice))
+                                debugPrint(
+                                    "%s Sell Order Placed for %s %s at %s" %
+                                    (buyEx.name, sellBackQty, buyPair, sellBackPrice))
 
                 """ Release balance reservation
                 Reduce available quantity.
@@ -1088,10 +1220,9 @@ def parseSpreads(pair, spreads):
                 sellBal.available -= Decimal(sellQty)
                 buyBal.reserved -= Decimal(buyQty)
                 sellBal.reserved -= Decimal(sellQty)
-            LASTPROCESSED[spread.Name] = Decimal((time.time() + 0.1) * 1000000000)
+            LASTPROCESSED[spread.Name] = Decimal(
+                (time.time() + 0.1) * 1000000000)
     return
-
-
 
 
 # MQTT FUNCTIONS
@@ -1105,13 +1236,11 @@ def getTopicFunc(topic):
         "bbal2": EXCHANGES["bittrex"].updateBalance if "bittrex" in EXCHANGES else False,
         "cbal2": EXCHANGES["cex"].updateBalance if "cex" in EXCHANGES else False,
         "pbal2": EXCHANGES["poloniex"].updateBalance if "poloniex" in EXCHANGES else False,
-	"okbal2": EXCHANGES["okex"].updateBalance if "okex" in EXCHANGES else False,
+        "okbal2": EXCHANGES["okex"].updateBalance if "okex" in EXCHANGES else False,
         "binbal2": EXCHANGES["binance"].updateBalance if "binance" in EXCHANGES else False,
-        #"balance/net": Net.update
+        # "balance/net": Net.update
     }
     return funcMap.get(topic, False)
-
-
 
 
 def mqConnect(client, userdata, flags, rc):
@@ -1187,15 +1316,12 @@ def mqParse(client, userdata, message):
         #func = Net.update(message.payload)
         #func = getTopicFunc(message.topic)
         msg = (message.payload.decode())
-        #print(msg)
+        # print(msg)
         NET.update(msg)
     else:
         func = getTopicFunc(message.topic)
         if func:
             func(message.payload)
-
-
-
 
 
 def mqPublish(id, payload, topic=config.mq_pubtop, qos=0, retain=False):
@@ -1220,7 +1346,8 @@ def mqPublish(id, payload, topic=config.mq_pubtop, qos=0, retain=False):
     if topic != 'messages':
         client.publish('messages', payload=payload, qos=qos, retain=retain)
 
-    #print(str(payload))
+    # print(str(payload))
+
 
 def mqStart(streamId):
     """ Helper function to create a client, connect, and add to the Clients recordset
@@ -1236,8 +1363,11 @@ def mqStart(streamId):
     client.on_message = mqParse
     # Client.message_callback_add(sub, callback) TODO Do we want individual handlers?
     # Connect to Broker
-    client.connect(config.mq_host, port=config.mq_port,
-                   keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+    client.connect(
+        config.mq_host,
+        port=config.mq_port,
+        keepalive=config.mq_keepalive,
+        bind_address=config.mq_bindAddress)
     # Subscribe to Topics
     client.subscribe(SUBSCRIPTIONS)  # TODO Discuss QoS States
     client.loop_start()
@@ -1250,13 +1380,21 @@ def printHedge():
     global EXCHANGES
     for ExName, Ex in EXCHANGES.items():
         for PairName, Pair in Ex.pairs.items():
-            pubprint("%s\t- %s\t%s %%" % (ExName, PairName, Pair["hedgeRatio"]))
+            pubprint(
+                "%s\t- %s\t%s %%" %
+                (ExName, PairName, Pair["hedgeRatio"]))
             #hedgeRatio = PairName+ "_"
-            #hedgeRatio.replace('_',Pair[hedgeRatio])
-            #print(hedgeRatio)
-        pubprint("%s\t- TOTAL BTC:\t%s (%s %%)" % (
-            ExName, Ex.volumeTotal, (Ex.volumeTotal * Decimal('100') / VOLUME).quantize(Decimal('0.01'), rounding=ROUND_DOWN)))
-
+            # hedgeRatio.replace('_',Pair[hedgeRatio])
+            # print(hedgeRatio)
+        pubprint(
+            "%s\t- TOTAL BTC:\t%s (%s %%)" %
+            (ExName,
+             Ex.volumeTotal,
+             (Ex.volumeTotal *
+              Decimal('100') /
+              VOLUME).quantize(
+                 Decimal('0.01'),
+                 rounding=ROUND_DOWN)))
 
 
 # MAIN
@@ -1265,6 +1403,7 @@ def main():
     global PAIRS
     global NET
     # Signal handling
+
     def signalHandler(signal, frame):
         try:
             (c.disconnect() for c in CLIENTS.values())
@@ -1296,9 +1435,10 @@ def main():
 
     if not INTERACTIVE:
         # Infinite Loop if interactive
-        while 1:
+        while True:
             continue
 
-#profile.run('main()')
+# profile.run('main()')
+
 
 main()

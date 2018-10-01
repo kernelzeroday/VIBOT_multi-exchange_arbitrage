@@ -2,6 +2,5 @@ from distutils.core import setup
 from Cython.Build import cythonize
 
 setup(
-    ext_modules = cythonize("Trade_current.py")
+    ext_modules=cythonize("Trade_current.py")
 )
-
