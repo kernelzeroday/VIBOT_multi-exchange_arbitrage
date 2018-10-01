@@ -6,7 +6,6 @@ from .mqtt_client import MMQTClient
 # from arbitrage_interface.settings import SCRAPPER_PATH, TRADE_ENGINE_PATH, BALANCE_ENGINE_PATH, ORDER_TRACKING_ENGINE_PATH, TRANSFER_ENGINE_PATH, LOG_ENGINE_PATH
 
 
-
 def exec(*command, stdout_on=False, cwd=None):
     if stdout_on:
         return subprocess.check_output(command).decode('utf-8')
@@ -27,17 +26,20 @@ def _disable_engine():
     for pid in pids:
         exec('sudo', 'kill', '-SIGKILL', pid)
 
+
 def stop_handler():
     print('stop_handler')
     try:
         _disable_engine()
     except Exception as e:
-        #todo: add log here
-        return {'success':False, 'error':str(e)}
+        # todo: add log here
+        return {'success': False, 'error': str(e)}
+
 
 def pause_handler():
     print('pause_handler')
     return {'success': False, 'error': "Pause doesn't work. Under constracrion"}
+
 
 def update_config_handler(data):
     print('update_config: %s' % (data))

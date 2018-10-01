@@ -4,23 +4,16 @@ from utils.helpers import DecimalEncoder
 import paho.mqtt.client as mqtt
 
 
-
-
 class MMQTClient:
     def __init__(self):
         pass
 
 
-
-
-
 CLIENTS = {}
 
 
-
-
 # MQTT FUNCTIONS
-def getTopicFunc(topic): ## why?
+def getTopicFunc(topic):  # why?
     """ This function maps incoming mq topics to a parsing function
     :param topic:   MQTT Subscription Topic
     :return         function to handle MQTT message body, or False
@@ -32,6 +25,7 @@ def getTopicFunc(topic): ## why?
         "pbal2": EXCHANGES["poloniex"].updateBalance if "poloniex" in EXCHANGES else False,
     }
     return funcMap.get(topic, False)
+
 
 def mqParse(client, userdata, message):
     """ MQTT Connect Event Listener
@@ -48,7 +42,7 @@ def mqParse(client, userdata, message):
                         }
     """
     if "/engine_manager" in message.topic:
-        #todo: handle answer here
+        # todo: handle answer here
         pass
 
 
@@ -137,10 +131,13 @@ def main():
     client = mqStart(MQ_SUBTOP)
 
 
-
-
 if __name__ == "__main__":
     main()
-    #mq_publish example
-    msg = json.dumps({"method": "setflag","params": {"key":"lmao","value":"lol"},"jsonrpc": "2.0","id": 0},cls=DecimalEncoder)
+    # mq_publish example
+    msg = json.dumps({"method": "setflag",
+                      "params": {"key": "lmao",
+                                 "value": "lol"},
+                      "jsonrpc": "2.0",
+                      "id": 0},
+                     cls=DecimalEncoder)
     mqPublish(MQ_SUBTOP, msg, topic=MQ_SUBTOP)

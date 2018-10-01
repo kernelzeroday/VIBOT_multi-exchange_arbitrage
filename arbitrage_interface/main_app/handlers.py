@@ -7,7 +7,6 @@ from .mqtt_client import MMQTClient
 from arbitrage_interface.settings import MQ_SUBTOP
 
 
-
 def exec(*command, stdout_on=False, cwd=None):
     if stdout_on:
         return subprocess.check_output(command).decode('utf-8')
@@ -19,27 +18,29 @@ def exec(*command, stdout_on=False, cwd=None):
 
 
 def start_handler():
-    msg = json.dumps({"method": "start_all_engines", "params": {"key": "lmao", "value": "lol"}, "jsonrpc": "2.0", "id": 0},
-                     cls=DecimalEncoder)
+    msg = json.dumps({"method": "start_all_engines", "params": {
+                     "key": "lmao", "value": "lol"}, "jsonrpc": "2.0", "id": 0}, cls=DecimalEncoder)
     MMQTClient().mqPublish(MQ_SUBTOP, msg, topic=MQ_SUBTOP)
 
 
 def stop_handler():
-    msg = json.dumps(
-        {"method": "stop_all_engines", "params": {"key": "lmao", "value": "lol"}, "jsonrpc": "2.0", "id": 0},
-        cls=DecimalEncoder)
+    msg = json.dumps({"method": "stop_all_engines", "params": {
+        "key": "lmao", "value": "lol"}, "jsonrpc": "2.0", "id": 0}, cls=DecimalEncoder)
     MMQTClient().mqPublish(MQ_SUBTOP, msg, topic=MQ_SUBTOP)
+
 
 def pause_handler(state):
     if state == 'pause':
         method = 'pause'
     elif state == 'unpause':
         method = 'unpause'
-    msg = json.dumps(
-        {"method": method, "params": {"key": "lmao", "value": "lol"}, "jsonrpc": "2.0", "id": 0},
-        cls=DecimalEncoder)
+    msg = json.dumps({"method": method,
+                      "params": {"key": "lmao",
+                                 "value": "lol"},
+                      "jsonrpc": "2.0",
+                      "id": 0},
+                     cls=DecimalEncoder)
     MMQTClient().mqPublish(MQ_SUBTOP, msg, topic=MQ_SUBTOP)
-
 
 
 def update_config_handler(data):

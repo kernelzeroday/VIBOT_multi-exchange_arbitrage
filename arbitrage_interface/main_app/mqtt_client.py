@@ -39,9 +39,8 @@ class MMQTClient:
                             }
         """
         if "/engine_manager" in message.topic:
-            #todo: handle answer here
+            # todo: handle answer here
             pass
-
 
     def mqConnect(self, client, userdata, flags, rc):
         """ MQTT Connect Event Listener
@@ -61,7 +60,6 @@ class MMQTClient:
         else:
             print("Refused %s" % rc)
 
-
     def mqDisconnect(self, client, userdata, rc):
         """ MQTT Connect Event Listener
         :param client:      Client instance
@@ -75,8 +73,13 @@ class MMQTClient:
         else:
             print("Error: Unexpected Disconnection")
 
-
-    def mqPublish(self, id, payload, topic='engine_manager', qos=0, retain=False):
+    def mqPublish(
+            self,
+            id,
+            payload,
+            topic='engine_manager',
+            qos=0,
+            retain=False):
         """ MQTT Publish Message to a Topic
         :param id           String of the Client ID
         :param topic:       String of the message topic
@@ -95,7 +98,6 @@ class MMQTClient:
         if not client:
             raise ValueError("Could not find an MQTT Client matching %s" % id)
         client.publish(topic, payload=payload, qos=qos, retain=retain)
-
 
     def mqStart(self, streamId):
         """ Helper function to create a client, connect, and add to the Clients recordset
@@ -118,4 +120,3 @@ class MMQTClient:
         client.loop_start()
         CLIENTS[streamId] = client
         return client
-
