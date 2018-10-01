@@ -1,3 +1,2 @@
-json-rpc
+json - rpc
 PyJWT
-

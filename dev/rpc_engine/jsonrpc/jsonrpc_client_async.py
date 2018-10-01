@@ -9,7 +9,7 @@ def main():
     # Example echo method
     payload = {
         "method": "setflag",
-        "params": {"key":"lmao","value":"lol"},
+        "params": {"key": "lmao", "value": "lol"},
         "jsonrpc": "2.0",
         "id": 0,
     }
@@ -20,6 +20,6 @@ def main():
     assert response["id"] == 0
     print(response)
 
+
 if __name__ == "__main__":
     main()
-
