@@ -2,7 +2,14 @@
 # -*- coding: utf-8 -*-
 
 
-import time,os,sys,json,threading,logging,signal,random
+import time
+import os
+import sys
+import json
+import threading
+import logging
+import signal
+import random
 import paho.mqtt.client as mqtt
 import poloniex
 import cexio
@@ -26,11 +33,11 @@ okex.apiKey = config.okexKey
 okex.secret = config.okexSecret
 
 # vars
-verbose=True
-debug=True
-simulate=False
-count=0
-threads=[]
+verbose = True
+debug = True
+simulate = False
+count = 0
+threads = []
 maxThreads = 1000
 # logger stuff
 logger = logging.getLogger(__name__)
@@ -38,40 +45,55 @@ logger.setLevel(logging.INFO)
 handler = logging.FileHandler('orderTracking.log')
 handler.setLevel(logging.INFO)
 # create a logging format
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(handler)
 # singal handler for ctl+c
+
+
 def signal_handler(signal, frame):
     print("\nprogram exiting gracefully")
     sys.exit(0)
 
+
 signal.signal(signal.SIGINT, signal_handler)
 
 # json hack (not currently used)
+
+
 class PythonObjectEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
             return super().default(obj)
         return {'_python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
 
+
 def as_python_object(dct):
     if '_python_object' in dct:
         return pickle.loads(b64decode(dct['_python_object'].encode('utf-8')))
     return dct
 # return unix time
+
+
 def tS():
     return time.time()
 # print to stderr
+
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+
 # main cancel order function
 """ Attempt to cancel the orders. If an order fails to cancel
 it is because the order has already been filled.
 """
-def cancel_order(exchange,orderID,pair='null'):
-    logger.info('Cancel order: %s on %s' %(orderID,exchange))
+
+
+def cancel_order(exchange, orderID, pair='null'):
+    logger.info('Cancel order: %s on %s' % (orderID, exchange))
     # sub functions for each exchange
 
     def cancel_bittrex(order_id):
@@ -84,58 +106,67 @@ def cancel_order(exchange,orderID,pair='null'):
         else:
             if ret == '':
                 logger.info("Successfully canceled bittrex order")
-                if verbose or debug: print('[*] Successfully canceled order %s' % order_id)
+                if verbose or debug:
+                    print('[*] Successfully canceled order %s' % order_id)
                 return True
             else:
-                if debug: print("[!] Failed cancel bittrex order call: "+str(ret))
-                if verbose: print("[*] Bittrex order %s filled..." % order_id)
+                if debug:
+                    print("[!] Failed cancel bittrex order call: " + str(ret))
+                if verbose:
+                    print("[*] Bittrex order %s filled..." % order_id)
                 return False
 
-    def cancel_okex(order_id,pair):
+    def cancel_okex(order_id, pair):
         origPair = str(pair)
         try:
             pair = pair.split('-')
-        except:
+        except BaseException:
             pair = pair.split('/')
         finally:
-        #else:
+            # else:
             #pair = str(pair)
             try:
-                pair = pair[1]+'/'+pair[0]
+                pair = pair[1] + '/' + pair[0]
             except Exception as err:
-                print('ERROR: '+str(err))
-                #return False
+                print('ERROR: ' + str(err))
+                # return False
             else:
                 pair = str(pair)
 
         try:
-            ret = okex.cancel_order(id=order_id,symbol=pair)
+            ret = okex.cancel_order(id=order_id, symbol=pair)
         except Exception as err:
             logger.info("Error canceling okex error" + str(err))
-            if verbose: print("[*] Okex order %s filled..." % order_id)
+            if verbose:
+                print("[*] Okex order %s filled..." % order_id)
             return False
         else:
-            #if ret['result'] == 'True': # Bittrex returns nothing upon success, does okex do the same? TODO: Verifiy this
+            # if ret['result'] == 'True': # Bittrex returns nothing upon
+            # success, does okex do the same? TODO: Verifiy this
             logger.info("Successfully canceled okex order")
-            if verbose or debug: print('[*] Successfully canceled order %s' % order_id)
+            if verbose or debug:
+                print('[*] Successfully canceled order %s' % order_id)
             return True
-            ##else:
+            # else:
             #    if debug: print("[!] Failed cancel okex order call: "+str(ret))
             #    if verbose: print("[*] Okex order %s filled..." % order_id)
             #    return False
 
     def cancel_poloniex(order_id):
-        poloniexAPI = poloniex.Poloniex(config.poloniexKey,config.poloniexSecret)
+        poloniexAPI = poloniex.Poloniex(
+            config.poloniexKey, config.poloniexSecret)
         try:
             ret = poloniexAPI.cancelOrder(order_id)
         except Exception as err:
             logger.info("Error canceling poloniex order " + str(err))
-            if verbose: print("[*] Poloniex order %s filled..." % order_id)
+            if verbose:
+                print("[*] Poloniex order %s filled..." % order_id)
             return False
         else:
             #ret = json.dumps(ret)
             logger.info("Successfully cancled poloniex order")
-            if verbose or debug: print("[*] Cancel poloniex order call: " + str(ret))
+            if verbose or debug:
+                print("[*] Cancel poloniex order call: " + str(ret))
             return True
 
     def cancel_cex(order_id):
@@ -144,31 +175,34 @@ def cancel_order(exchange,orderID,pair='null'):
             ret = cexioAPI.cancel_order(str(order_id))
         except Exception as err:
             logger.info("Error canceling cex order " + str(err))
-            if verbose: print("[*] Cex order %s filled..." % order_id)
+            if verbose:
+                print("[*] Cex order %s filled..." % order_id)
             return False
         else:
             #ret = json.dumps(ret)
-            logger.info("Successfully canceled cex order" +str(ret))
-            if debug: print("[*] Cancel cex order call: "+str(ret))
+            logger.info("Successfully canceled cex order" + str(ret))
+            if debug:
+                print("[*] Cancel cex order call: " + str(ret))
             return True
 
-    def cancel_binance(order_id,pair):
+    def cancel_binance(order_id, pair):
         origPair = str(pair)
         try:
             pair = pair.split('-')
-        except:
+        except BaseException:
             pair = pair.split('/')
         finally:
-        #else:
+            # else:
             #pair = str(pair)
             try:
-                pair = pair[1]+pair[0]
+                pair = pair[1] + pair[0]
             except Exception as err:
-                print('ERROR: '+str(err))
-                #return False
+                print('ERROR: ' + str(err))
+                # return False
             else:
                 pair = str(pair)
-        if debug: print('[*] DEBUG: Binance pair: '+str(pair))
+        if debug:
+            print('[*] DEBUG: Binance pair: ' + str(pair))
         binanceApi = Client(config.binanceKey, config.binanceSecret)
         #print('[DEBUG: Binance pair] '+str(pair))
         if order_id == 'null':
@@ -178,49 +212,59 @@ def cancel_order(exchange,orderID,pair='null'):
             ret = binanceApi.cancel_order(orderId=order_id, symbol=pair)
         except Exception as err:
             logger.info(err)
-            if debug: print('[!] Error canceling binance order: '+ str(err))
-            if verbose: print("[*] Binance order %s filled..." % order_id)
+            if debug:
+                print('[!] Error canceling binance order: ' + str(err))
+            if verbose:
+                print("[*] Binance order %s filled..." % order_id)
             return False
         else:
             ret = json.dumps(ret)
-            logger.info("Successfully canceled binance order" +str(ret))
-            if debug: print("[*] Cancel binance order call: "+str(ret))
+            logger.info("Successfully canceled binance order" + str(ret))
+            if debug:
+                print("[*] Cancel binance order call: " + str(ret))
             return True
 
     # simulation mode
     if simulate:
-        print("[*] (simulation) Canceling order: %s on exchange: %s" % (orderID,exchange))
+        print(
+            "[*] (simulation) Canceling order: %s on exchange: %s" %
+            (orderID, exchange))
         return True
     else:
         # live mode
         if exchange == 'bittrex':
             ret = cancel_bittrex(orderID)
-            if ret: return True
+            if ret:
+                return True
         if exchange == 'poloniex':
             ret = cancel_poloniex(orderID)
-            if ret: return True
+            if ret:
+                return True
         if exchange == 'cex':
             ret = cancel_cex(orderID)
-            if ret: return True
+            if ret:
+                return True
         if exchange == 'binance':
-            ret = cancel_binance(orderID,pair) # Binance api is silly and requires a pair to cancel an order
+            # Binance api is silly and requires a pair to cancel an order
+            ret = cancel_binance(orderID, pair)
         if exchange == 'okex':
-            ret = cancel_okex(orderID,pair) # as is okex api
+            ret = cancel_okex(orderID, pair)  # as is okex api
     #if debug: print(ret)
 
-def get_ticker(exchange,pair,mode):
+
+def get_ticker(exchange, pair, mode):
     """ Check the current price of the asset. The `mode` parameter is
         what tells the function whether to return ask price or bid price.
     """
-    def binance_ticker(pair,mode):
+    def binance_ticker(pair, mode):
         binanceApi = Client(config.binanceKey, config.binanceSecret)
         try:
             pair = pair.split('-')
-        except:
+        except BaseException:
             pair = pair.split('/')
         finally:
             #if debug: print('[*] DEBUG: '+str(pair))
-            pair = pair[1]+pair[0]
+            pair = pair[1] + pair[0]
 
         pair = str(pair)
         if pair == 'null':
@@ -230,7 +274,7 @@ def get_ticker(exchange,pair,mode):
             t = binanceApi.get_orderbook_ticker(symbol=pair)
         except Exception as err:
             logging.error(err)
-            eprint('Error getting binance ticker data: '+str(err))
+            eprint('Error getting binance ticker data: ' + str(err))
             return False
         else:
             tt = json.dumps(t)
@@ -239,17 +283,22 @@ def get_ticker(exchange,pair,mode):
                 tt = tt['askPrice']
             elif mode == 'sell':
                 tt = tt['bidPrice']
-            if debug: print('[*] Binance ticker call: '+ str(pair)+ ' : '+ str(tt))
+            if debug:
+                print(
+                    '[*] Binance ticker call: ' +
+                    str(pair) +
+                    ' : ' +
+                    str(tt))
             return(tt)
 
-    def okex_ticker(pair,mode):
+    def okex_ticker(pair, mode):
         try:
             pair = pair.split('-')
-        except:
+        except BaseException:
             pair = pair.split('/')
         finally:
-            print('[*] DEBUG: '+str(pair))
-            pair = pair[1]+"/"+pair[0]
+            print('[*] DEBUG: ' + str(pair))
+            pair = pair[1] + "/" + pair[0]
 
         pair = str(pair)
         if pair == 'null':
@@ -259,19 +308,18 @@ def get_ticker(exchange,pair,mode):
             t = okex.fetch_ticker(pair)
         except Exception as err:
             logging.error(err)
-            eprint('Error getting okex ticker data: '+str(err))
+            eprint('Error getting okex ticker data: ' + str(err))
             return False
         else:
             if mode == 'buy':
                 tt = t['ask']
             elif mode == 'sell':
                 tt = t['bid']
-            if debug: print('[*] Okex ticker call: '+ str(pair)+ ' : '+ str(tt))
+            if debug:
+                print('[*] Okex ticker call: ' + str(pair) + ' : ' + str(tt))
             return(tt)
 
-
-
-    def bittrex_ticker(pair,mode):
+    def bittrex_ticker(pair, mode):
         bittrexAPI = bittrex.bittrex(config.bittrexKey, config.bittrexSecret)
         pair = str(pair)
         if pair == 'null':
@@ -281,7 +329,7 @@ def get_ticker(exchange,pair,mode):
             t = bittrexAPI.getticker(pair)
         except Exception as err:
             logger.error(err)
-            eprint('Error getting ticker data: '+str(err))
+            eprint('Error getting ticker data: ' + str(err))
             return False
         else:
             tt = json.dumps(t)
@@ -290,24 +338,30 @@ def get_ticker(exchange,pair,mode):
                 tt = tt['Ask']
             elif mode == 'sell':
                 tt = tt['Bid']
-            if debug: print('[*] Bittrex ticker call: '+ str(pair)+ ' : '+ str(tt))
+            if debug:
+                print(
+                    '[*] Bittrex ticker call: ' +
+                    str(pair) +
+                    ' : ' +
+                    str(tt))
             return(tt)
 
-    def polo_ticker(pair,mode):
-        data = poloniex.Poloniex(config.poloniexKey,config.poloniexSecret)
+    def polo_ticker(pair, mode):
+        data = poloniex.Poloniex(config.poloniexKey, config.poloniexSecret)
         ticker = data.returnTicker()
         # this fixes json!
-        ret = json.dumps(ticker[pair],cls=PythonObjectEncoder)
-        ret = json.loads(ret,object_hook=as_python_object)
+        ret = json.dumps(ticker[pair], cls=PythonObjectEncoder)
+        ret = json.loads(ret, object_hook=as_python_object)
         if mode == 'buy':
             ret = ret['lowestAsk']
         elif mode == 'sell':
             ret = ret['highestBid']
-        logger.info("Poloniex Ticker call: "+str(ret))
-        if debug: print('[*] Poloniex ticker call: '+ str(pair)+ ' : '+ str(tt))
+        logger.info("Poloniex Ticker call: " + str(ret))
+        if debug:
+            print('[*] Poloniex ticker call: ' + str(pair) + ' : ' + str(tt))
         return(ret)
-    
-    def cex_ticker(pair,mode):
+
+    def cex_ticker(pair, mode):
         try:
             pair = str(pair)
             api = cexio.Api(config.cexUser, config.cexKey, config.cexSecret)
@@ -317,40 +371,47 @@ def get_ticker(exchange,pair,mode):
                 data = data['ask']
             elif mode == 'sell':
                 data = data['bid']
-            if debug: print('[*] Cex ticker call: '+ str(pair)+ ' : '+ str(tt))
+            if debug:
+                print('[*] Cex ticker call: ' + str(pair) + ' : ' + str(tt))
             return(data)
         except Exception as err:
             print("Error: %s" % err)
             return False
-    
+
     #
     if exchange == 'poloniex':
-        ticker = polo_ticker(pair,mode)
+        ticker = polo_ticker(pair, mode)
     elif exchange == 'cex':
-        ticker = cex_ticker(pair,mode)
+        ticker = cex_ticker(pair, mode)
     elif exchange == 'bittrex':
-        ticker = bittrex_ticker(pair,mode)
+        ticker = bittrex_ticker(pair, mode)
     elif exchange == 'binance':
-        ticker = binance_ticker(pair,mode)
+        ticker = binance_ticker(pair, mode)
     elif exchange == 'okex':
-        ticker = okex_ticker(pair,mode)
+        ticker = okex_ticker(pair, mode)
     else:
         return('Invalid Exchange')
-    if debug:print('[i] Ticker call...' + str(ticker))
-    if ticker: return(ticker)
+    if debug:
+        print('[i] Ticker call...' + str(ticker))
+    if ticker:
+        return(ticker)
+
 
 """ This function determines whether or not a pending order is considered to be viable
-    or not. If not viable, we cancel the order. Viable means that the target price and 
-    current price are close, indicating that the order should remain open because it 
+    or not. If not viable, we cancel the order. Viable means that the target price and
+    current price are close, indicating that the order should remain open because it
     will likely fill.
 """
-def viable(exchange,mode,orig,pair,kind='Arbitrage'):
+
+
+def viable(exchange, mode, orig, pair, kind='Arbitrage'):
     try:
-        new = get_ticker(exchange,pair,mode)
-    except:
+        new = get_ticker(exchange, pair, mode)
+    except BaseException:
         mqsend('[!] DEBUG: Could not get ticker data, discarding order... ')
         return False
-    if debug: print("[i] DEBUG: " +str(mode) + " " + str(orig)+ " " +str(new))
+    if debug:
+        print("[i] DEBUG: " + str(mode) + " " + str(orig) + " " + str(new))
     if kind == 'Arbitrage':
         viablePct = 0.1
     else:
@@ -359,24 +420,29 @@ def viable(exchange,mode,orig,pair,kind='Arbitrage'):
         decrease = float(orig) - float(new)
         pct = float(decrease) / float(orig) * float(100.00)
         if float(pct) <= float(viablePct) and float(pct) > 0.0:
-           if debug: mqsend('[i] : Viable:' + str(pct))
-           return True
+            if debug:
+                mqsend('[i] : Viable:' + str(pct))
+            return True
         else:
-           if debug:print("[i] Pct was: " +str(pct))
-           return False
+            if debug:
+                print("[i] Pct was: " + str(pct))
+            return False
     elif mode == 'buy':
         increase = float(new) - float(orig)
         pct = float(increase) / float(orig) * float(100)
         if float(pct) <= float(viablePct) and float(pct) > 0.0:
-            if debug: mqsend('[i] : Viable: ' + str(pct))
+            if debug:
+                mqsend('[i] : Viable: ' + str(pct))
             return True
         else:
-            if debug:print("[i] Pct was: " +str(pct))
+            if debug:
+                print("[i] Pct was: " + str(pct))
             return False
     else:
-       logger.info('Error: Invalid mode.')
-       return False
-    if debug: mqsend("[i] Pct was: " +str(pct))
+        logger.info('Error: Invalid mode.')
+        return False
+    if debug:
+        mqsend("[i] Pct was: " + str(pct))
 
 
 """ Que each pending order in a thread. Check order viability at random intervals (to confuse trade analysis and protect our
@@ -384,36 +450,46 @@ strategy.) If the order is not consiered viable (not likely to fill any
  time soon), we cancel it.
 """
 
-def que_Order(exchange,expire,orderID,mode,pair,price,kind):
-    t = random.randint(1,5)
-    wait = random.randint(3,10);_wait = str(wait);_exchange = str(exchange);_orderID = str(orderID)
+
+def que_Order(exchange, expire, orderID, mode, pair, price, kind):
+    t = random.randint(1, 5)
+    wait = random.randint(3, 10)
+    _wait = str(wait)
+    _exchange = str(exchange)
+    _orderID = str(orderID)
     while True:
         if float(expire) <= tS() and kind == 'Limit':
             print('[*] Limit Order')
-            if viable(exchange,mode,price,pair,kind):
-                mqsend('[*] Limit Order %s on exchange %s still viable, sleeping for %s secs ..'% (_orderID,_exchange,_wait))
+            if viable(exchange, mode, price, pair, kind):
+                mqsend(
+                    '[*] Limit Order %s on exchange %s still viable, sleeping for %s secs ..' %
+                    (_orderID, _exchange, _wait))
                 time.sleep(wait)
             else:
-                mqsend("[*] Limit %s order with id: %s expired, canceling...", (exchange,orderID))
+                mqsend(
+                    "[*] Limit %s order with id: %s expired, canceling...", (exchange, orderID))
                 logger.info('%s order timed out, canceling...' % exchange)
-                ret = cancel_order(exchange,orderID,pair)
-                mqsend('[*] Request cancel Limit order. Status:' +str(ret))
+                ret = cancel_order(exchange, orderID, pair)
+                mqsend('[*] Request cancel Limit order. Status:' + str(ret))
                 break
         elif float(expire) <= tS() and kind == 'Arbitrage':
             print('[*] Arb order')
             time.sleep(30)
-            if viable(exchange,mode,price,pair,kind):
-                arbTime = random.randint(30,60)
+            if viable(exchange, mode, price, pair, kind):
+                arbTime = random.randint(30, 60)
                 time.sleep(arbTime)
             else:
-                mqsend("[*] Arbitrage %s order with id: %s expired, canceling..." % (exchange,orderID))
-                logger.info('Arbitrage order %s on exchange %s timed out, canceling...' % (exchange,_orderID))
-                ret = cancel_order(exchange,orderID,pair)
+                mqsend(
+                    "[*] Arbitrage %s order with id: %s expired, canceling..." %
+                    (exchange, orderID))
+                logger.info(
+                    'Arbitrage order %s on exchange %s timed out, canceling...' %
+                    (exchange, _orderID))
+                ret = cancel_order(exchange, orderID, pair)
                 mqsend('Request cancel Arbitrage order. Status: ' + str(ret))
                 break
         else:
             time.sleep(t)
-
 
 
 # connect to MqTT Stream
@@ -436,6 +512,8 @@ def mqConnect(client, userdata, flags, rc):
         print("[!] Refused %s" % rc)
 
 # Disconnect from mqtt
+
+
 def mqDisconnect(client, userdata, rc):
     """ MQTT Connect Event Listener
     :param client:      Client instance
@@ -450,6 +528,8 @@ def mqDisconnect(client, userdata, rc):
         print("[!] Error: Unexpected Disconnection")
 
 # On message function. Main logic here
+
+
 def mqParse(client, userdata, message):
     """ MQTT Connect Event Listener
     :param client:      Client instance
@@ -483,9 +563,9 @@ def mqParse(client, userdata, message):
         obj = json.loads(str(message.payload.decode('UTF-8')))
     except Exception as err:
         eprint('ERROR: %s error loading json!' % err)
-        bad_data=True
+        bad_data = True
     else:
-        bad_data=False
+        bad_data = False
         #if debug: print(obj)
     # Parse the object
     if not bad_data:
@@ -496,36 +576,35 @@ def mqParse(client, userdata, message):
             return False
         try:
             orderID = obj['OrderID']
-        except:
+        except BaseException:
             eprint('Error parsing OrderID from object')
             return False
         try:
             kind = obj['Kind']
-        except:
+        except BaseException:
             eprint('Error parsing Kind from object')
             return False
         try:
             expires = obj['Expires']
-        except:
+        except BaseException:
             eprint('Error parsing Expires from object')
-        
+
             return False
         try:
             mode = obj['Type']
-        except:
+        except BaseException:
             eprint('Error parsing Type from object')
             return False
         try:
             pair = obj['Pair']
-        except:
+        except BaseException:
             eprint('Error parsing Pair from object')
             return False
         try:
             price = obj['Price']
-        except:
+        except BaseException:
             eprint('Error parsing Price from object')
             return False
-
 
     # declare as string variables
     try:
@@ -534,26 +613,32 @@ def mqParse(client, userdata, message):
         exchange_ = str(exchange)
         expires_ = str(expires)
         mode_ = str(mode)
-        pair_ =str(pair)
+        pair_ = str(pair)
         price_ = str(price)
     except Exception as err:
         print(err)
     # Received an order, prepare to que
     if kind_ == 'Limit':
         if verbose or debug:
-            print("[*] Tracking new Limit order on exchange %s : %s , expires %s " % (exchange_,orderID_,expires_))
-        mqsend("Tracking new %s Limit order on exchange %s : %s , expires %s" % (mode_,exchange_,orderID_,expires_))
-        #threads=[]
+            print(
+                "[*] Tracking new Limit order on exchange %s : %s , expires %s " %
+                (exchange_, orderID_, expires_))
+        mqsend(
+            "Tracking new %s Limit order on exchange %s : %s , expires %s" %
+            (mode_, exchange_, orderID_, expires_))
+        # threads=[]
     elif kind_ == 'Arbitrage':
-        #threads=[]
+        # threads=[]
         if verbose or debug:
-            mqsend("[*] Tracking new Arbitrage order on exchange %s : %s , expires a few seconds from now " % (exchange_,orderID_))
+            mqsend(
+                "[*] Tracking new Arbitrage order on exchange %s : %s , expires a few seconds from now " %
+                (exchange_, orderID_))
             now = time.time()
-            later = random.randint(10,30)
-            later = now+later
-            expires=later
+            later = random.randint(10, 30)
+            later = now + later
+            expires = later
 
-        #TODO: verify thread tracking
+        # TODO: verify thread tracking
         """if count>int(maxThreads):
             mqsend("[*] CRITICAL: Stopping because reached max threads (%s)! Contact your admininstrator!" % maxThreads)
             logger.info('Too many threads open!')
@@ -571,30 +656,52 @@ def mqParse(client, userdata, message):
         #mqsend('Order %s on exchange %s qued in thread for canceling' % (orderID_,exchange_))
         #logger.info('Order %s on exchange %s qued in thread for canceling' % (orderID_,exchange_))
 
-        if count>int(maxThreads):
-            mqsend("[*] CRITICAL: Stopping because reached max threads (%s)! Contact your admininstrator!" % maxThreads)
-            if verbose or debug: print("[*] CRITICAL: Too many threads! Discarding order!")
+        if count > int(maxThreads):
+            mqsend(
+                "[*] CRITICAL: Stopping because reached max threads (%s)! Contact your admininstrator!" %
+                maxThreads)
+            if verbose or debug:
+                print("[*] CRITICAL: Too many threads! Discarding order!")
             logger.info('Too many threads open!')
             return
         else:
-            t = threading.Thread(target=que_Order, args=(exchange_,expires_,orderID_,mode_,pair_,price_,kind_ ))
+            t = threading.Thread(
+                target=que_Order,
+                args=(
+                    exchange_,
+                    expires_,
+                    orderID_,
+                    mode_,
+                    pair_,
+                    price_,
+                    kind_))
             t.start()
-            count+=1
+            count += 1
         if count % 10 == 0:
             activeThreads = (threading.active_count())
             mqsend("[*] Processed %s orders" % activeThreads)
-            if verbose or debug: print("[*] Processed %s orders" % activeThreads)
+            if verbose or debug:
+                print("[*] Processed %s orders" % activeThreads)
 
-        if verbose: print('[*] Order %s on exchange %s qued in thread for canceling' % (orderID_,exchange_))
-        mqsend('Order %s on exchange %s qued in thread for canceling' % (orderID_,exchange_))
-        logger.info('Order %s on exchange %s qued in thread for canceling' % (orderID_,exchange_))
+        if verbose:
+            print(
+                '[*] Order %s on exchange %s qued in thread for canceling' %
+                (orderID_, exchange_))
+        mqsend(
+            'Order %s on exchange %s qued in thread for canceling' %
+            (orderID_, exchange_))
+        logger.info(
+            'Order %s on exchange %s qued in thread for canceling' %
+            (orderID_, exchange_))
 
 
 import paho.mqtt.client as mqtt
 
 # This is the Publisher
 
-#TODO: Publish Canceled Order Info to stream ('canceled')?
+# TODO: Publish Canceled Order Info to stream ('canceled')?
+
+
 def mqsend(message, topic='messages'):
     """ Publishes a message to pubtop """
     #client = mqtt.Client()
@@ -603,7 +710,7 @@ def mqsend(message, topic='messages'):
     client = mqtt.Client(client_id="publish_track", clean_session=False)
     client = mqtt.Client('terr')
     client.username_pw_set(username='vibot', password='NmQ5Nj_3MrAwiNDu')
-    client.connect(config.mq_host,1883,60)
+    client.connect(config.mq_host, 1883, 60)
 
     try:
         json.loads('{"tracking" : "%s" }' % message_)
@@ -625,6 +732,7 @@ def mqsend(message, topic='messages'):
         logger.info('ERROR publishing message: ' + err)
         pass
 
+
 def mqStart(streamId):
     """ Helper function to create a client, connect, and add to the Clients recordset
     :param streamID:    MQTT Client ID
@@ -639,8 +747,11 @@ def mqStart(streamId):
     client.on_message = mqParse
     # Client.message_callback_add(sub, callback) TODO Do we want individual handlers?
     # Connect to Broker
-    client.connect(config.mq_host, port=config.mq_port,
-                   keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+    client.connect(
+        config.mq_host,
+        port=config.mq_port,
+        keepalive=config.mq_keepalive,
+        bind_address=config.mq_bindAddress)
     # Subscribe to Topics
     client.subscribe("verified")  # TODO Discuss QoS States
     client.loop_start()
@@ -656,4 +767,3 @@ while 1:
     except KeyboardInterrupt:
         print('[*] Caught Signal, exiting gracefully.\nBye!')
         sys.exit(0)
-

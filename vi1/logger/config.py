@@ -18,4 +18,3 @@ cexSecret = '2Aw2B2O8RFx93ifAfJFnVS51jaY'
 
 bittrexKey = 'f18ac03ce7da4bd7a02e766b9b2912c5'
 bittrexSecret = 'd3374fed38b14e988f7905400e5d28b2'
-

@@ -7,15 +7,18 @@ import config
 import paho.mqtt.client as mqtt
 
 topic = "pbal2"
-client = mqtt.Client(topic+"client", clean_session=False)
+client = mqtt.Client(topic + "client", clean_session=False)
 client.username_pw_set(config.mq_user, config.mq_pass)
-client.connect(config.mq_host, port=config.mq_port,
-               keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+client.connect(
+    config.mq_host,
+    port=config.mq_port,
+    keepalive=config.mq_keepalive,
+    bind_address=config.mq_bindAddress)
 client.loop_start()
 
 pol = PoloniexAPI.Poloniex(config.poloniexKey, config.poloniexSecret)
 
-while 1:
+while True:
     result = {}
     pbal = pol.returnCompleteBalances()
     try:
@@ -31,7 +34,6 @@ while 1:
             }
         print(result)
         client.publish(topic, payload=json.dumps(result), qos=0, retain=False)
-    except:
+    except BaseException:
         pass
     time.sleep(10)
-

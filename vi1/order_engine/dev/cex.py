@@ -15,9 +15,7 @@ import time
 import requests
 
 
-
 BASE_URL = 'https://cex.io/api/%s/'
-
 
 
 PUBLIC_COMMANDS = {
@@ -41,7 +39,6 @@ PUBLIC_COMMANDS = {
 }
 
 
-
 class Api:
 
     """
@@ -58,28 +55,24 @@ class Api:
 
         self.api_secret = api_secret
 
-
-
     @property
-
     def __nonce(self):
 
         return str(int(time.time() * 1000))
-
-    
 
     def __signature(self, nonce):
 
         message = nonce + self.username + self.api_key
 
-        signature = hmac.new(bytearray(self.api_secret.encode('utf-8')), message.encode('utf-8'), digestmod = hashlib.sha256).hexdigest().upper()
+        signature = hmac.new(
+            bytearray(
+                self.api_secret.encode('utf-8')),
+            message.encode('utf-8'),
+            digestmod=hashlib.sha256).hexdigest().upper()
 
         return signature
 
-
-
     def api_call(self, command, param=None, action=''):
-
         """
 
         :param command: Query command for getting info
@@ -104,8 +97,6 @@ class Api:
 
             param = {}
 
-
-
         if command not in PUBLIC_COMMANDS:
 
             nonce = self.__nonce
@@ -120,26 +111,17 @@ class Api:
 
             })
 
-        
-
         request_url = (BASE_URL % command) + action
 
         result = self.__post(request_url, param)
 
-
-
         return result
-
-
 
     def last_price(self, market='BTC/USD'):
 
         return self.api_call('last_price', None, market)
 
-
-
     def ticker(self, market='BTC/USD'):
-
         """
 
         :param market: String literal for the market (ex: BTC/ETH)
@@ -156,45 +138,29 @@ class Api:
 
         return self.api_call('ticker', None, market)
 
-
-
     @property
-
     def balance(self):
 
         return self.api_call('balance')
 
+    def get_deposit_addresses(self, currency='BTC'):
 
-
-    def get_deposit_addresses(self,currency='BTC'):
-
-         return self.api_call('get_address', { 'currency': currency })
-
-
-
-
+        return self.api_call('get_address', {'currency': currency})
 
     @property
-
     def get_myfee(self):
 
         return self.api_call('get_myfee')
 
-
-
     @property
-
     def currency_limits(self):
 
         return self.api_call('currency_limits')
 
-
-
     def convert(self, amount=1, market='BTC/USD'):
-
         """
 
-        Converts any amount of the currency to any other currency by multiplying the amount 
+        Converts any amount of the currency to any other currency by multiplying the amount
 
         by the last price of the chosen pair according to the current exchange rate.
 
@@ -212,25 +178,19 @@ class Api:
 
         """
 
-        return self.api_call('convert', { 'amnt': amount }, market)
-
-    
+        return self.api_call('convert', {'amnt': amount}, market)
 
     def open_orders(self, market):
 
         return self.api_call('open_orders', None, market)
 
-
-
     def cancel_order(self, order_id):
 
-        return self.api_call('cancel_order', { 'id': order_id })
-
-
+        return self.api_call('cancel_order', {'id': order_id})
 
     def buy_limit_order(self, amount, price, market):
 
-        params =  {
+        params = {
 
             'type': 'buy',
 
@@ -240,15 +200,11 @@ class Api:
 
         }
 
-
-
         return self.api_call('place_order', params, market)
-
-
 
     def sell_limit_order(self, amount, price, market):
 
-        params =  {
+        params = {
 
             'type': 'sell',
 
@@ -258,13 +214,16 @@ class Api:
 
         }
 
-
-
         return self.api_call('place_order', params, market)
 
-
-
-    def open_long_position(self, amount, symbol, estimated_open_price, stop_loss_price, leverage=2, market='BTC/USD'):
+    def open_long_position(
+            self,
+            amount,
+            symbol,
+            estimated_open_price,
+            stop_loss_price,
+            leverage=2,
+            market='BTC/USD'):
 
         params = {
 
@@ -284,13 +243,16 @@ class Api:
 
         }
 
-
-
         return self.api_call('open_position', params, market)
 
-
-
-    def open_short_position(self, amount, symbol, estimated_open_price, stop_loss_price, leverage=2, market='BTC/USD'):
+    def open_short_position(
+            self,
+            amount,
+            symbol,
+            estimated_open_price,
+            stop_loss_price,
+            leverage=2,
+            market='BTC/USD'):
 
         params = {
 
@@ -310,46 +272,42 @@ class Api:
 
         }
 
-
-
         return self.api_call('open_position', params, market)
-
-
 
     def open_positions(self, market='BTC/USD'):
 
         return self.api_call('open_positions', None, market)
 
-
-
     def close_position(self, position_id, market='BTC/USD'):
 
-        return self.api_call('close_position', { 'id': position_id }, market)
-
-
+        return self.api_call('close_position', {'id': position_id}, market)
 
     def get_order(self, order_id):
 
-        return self.api_call('get_order', { 'id': order_id })
-
-
+        return self.api_call('get_order', {'id': order_id})
 
     def order_book(self, depth=1, market='BTC/USD'):
 
-        return self.api_call('order_book', None, market + '/?depth=' + str(depth))
-
-
+        return self.api_call(
+            'order_book',
+            None,
+            market +
+            '/?depth=' +
+            str(depth))
 
     def trade_history(self, since=1, market='BTC/USD'):
 
-        return self.api_call('trade_history', None, market + '/?since=' + str(since))
-
-
+        return self.api_call(
+            'trade_history',
+            None,
+            market +
+            '/?since=' +
+            str(since))
 
     def __post(self, url, param):
 
-        result = requests.post(url, data=param, headers={ 'User-agent': 'bot-cex.io-' + self.username }).json()
+        result = requests.post(
+            url, data=param, headers={
+                'User-agent': 'bot-cex.io-' + self.username}).json()
 
         return result
-
-

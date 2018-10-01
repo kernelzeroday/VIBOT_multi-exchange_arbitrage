@@ -3,10 +3,9 @@ import pololib as Poloniex
 import cexlib as Cex
 
 
+def Exchange(exchange, action, pair=None, price=0.0, amount=0.0):
 
-def Exchange(exchange,action,pair=None,price=0.0,amount=0.0):
-
-    def ticker(exchange,pair):
+    def ticker(exchange, pair):
 
         def poloniex_ticker(pair):
             ret = Poloniex.ticker(pair)
@@ -34,15 +33,15 @@ def Exchange(exchange,action,pair=None,price=0.0,amount=0.0):
         def poloniex_balances():
             ret = Poloniex.balances()
             return ret
-        
+
         def bittrex_balances():
             ret = Bittrex.balances()
             return ret
-        
+
         def cex_balances():
             ret = Cex.balances()
             return ret
-        
+
         if exchange == 'poloniex':
             ret = poloniex_balances()
             return ret
@@ -54,8 +53,6 @@ def Exchange(exchange,action,pair=None,price=0.0,amount=0.0):
             return ret
         else:
             return('Invalid exchange')
-
-
 
     def open_orders(exchange):
 
@@ -70,7 +67,7 @@ def Exchange(exchange,action,pair=None,price=0.0,amount=0.0):
         def cex_orders():
             ret = Cex.orders()
             return ret
-        
+
         if exchange == 'poloniex':
             ret = poloniex_orders()
             return ret
@@ -83,71 +80,70 @@ def Exchange(exchange,action,pair=None,price=0.0,amount=0.0):
         else:
             return('Invalid exchange')
 
+    def buy_limit(exchange, pair, amount, price):
 
-    def buy_limit(exchange,pair,amount,price):
-
-        def poloniex_buy(pair,amount,price):
-            ret = Poloniex.buy(pair,amount,price)
+        def poloniex_buy(pair, amount, price):
+            ret = Poloniex.buy(pair, amount, price)
             return ret
 
-        def bittrex_buy(pair,amount,price):
-            ret = Bittrex.buy(pair,amount,price)
+        def bittrex_buy(pair, amount, price):
+            ret = Bittrex.buy(pair, amount, price)
             return ret
-        def cex_buy(pair,amount,price):
-            ret = Cex.buy(pair,amount,price)
+
+        def cex_buy(pair, amount, price):
+            ret = Cex.buy(pair, amount, price)
             return ret
-        
+
         if exchange == 'poloniex':
-            ret = poloniex_buy(pair,amount,price)
+            ret = poloniex_buy(pair, amount, price)
             return ret
         elif exchange == 'bittrex':
-            ret = bittrex_buy(pair,amount,price)
+            ret = bittrex_buy(pair, amount, price)
             return ret
         elif exchange == 'cex':
-            ret = cex_buy(pair,amount,price)
+            ret = cex_buy(pair, amount, price)
             return ret
         else:
             return('Invalid exchange')
 
+    def sell_limit(exchange, pair, amount, price):
 
-    def sell_limit(exchange,pair,amount,price):
-        
-        def poloniex_sell(pair,amount,price):
-            ret = Poloniex.sell(pair,amount,price)
+        def poloniex_sell(pair, amount, price):
+            ret = Poloniex.sell(pair, amount, price)
             return ret
 
-        def bittrex_sell(pair,amount,price):
-            ret = Bittrex.sell(pair,amount,price)
+        def bittrex_sell(pair, amount, price):
+            ret = Bittrex.sell(pair, amount, price)
             return ret
-        def cex_sell(pair,amount,price):
-            ret = Cex.sell(pair,amount,price)
+
+        def cex_sell(pair, amount, price):
+            ret = Cex.sell(pair, amount, price)
             return ret
-        
 
         if exchange == 'poloniex':
-            ret = poloniex_sell(pair,amount,price)
+            ret = poloniex_sell(pair, amount, price)
             return ret
         elif exchange == 'bittrex':
-            ret = bittrex_sell(pair,amount,price)
+            ret = bittrex_sell(pair, amount, price)
             return ret
         elif exchange == 'cex':
-            ret = cex_sell(pair,amount,price)
+            ret = cex_sell(pair, amount, price)
             return ret
         else:
             return('Invalid exchange')
 
-
-    def cancel_order(exchange,orderID):
+    def cancel_order(exchange, orderID):
         def poloniex_cancel(orderID):
             ret = Poloniex.cancel(orderID)
             return ret
+
         def bittrex_cancel(orderID):
             ret = Bittrex.cancel(orderID)
             return ret
+
         def cex_cancel(orderID):
             ret = Cex.cancel(orderID)
             return ret
-
 
         if exchange == 'poloniex':
             ret = poloniex_cancel(orderID)
@@ -161,12 +157,8 @@ def Exchange(exchange,action,pair=None,price=0.0,amount=0.0):
         else:
             return('Invalid exchange')
 
-
-
-
-
     if action == 'ticker':
-        ret = ticker(exchange,pair)
+        ret = ticker(exchange, pair)
         return ret
     elif action == 'balances':
         ret = balances(exchange)
@@ -175,13 +167,12 @@ def Exchange(exchange,action,pair=None,price=0.0,amount=0.0):
         ret = open_orders(exchange)
         return ret
     elif action == 'buy':
-        ret = buy_limit(exchange,pair,amount,price)
+        ret = buy_limit(exchange, pair, amount, price)
         return ret
     elif action == 'sell':
-        ret = sell_limit(exchange,pair,amount,price)
+        ret = sell_limit(exchange, pair, amount, price)
         return ret
     elif action == 'cancel':
-        ret = cancel_order(exchange,orderID)
+        ret = cancel_order(exchange, orderID)
     else:
         return("Invalid action")
-

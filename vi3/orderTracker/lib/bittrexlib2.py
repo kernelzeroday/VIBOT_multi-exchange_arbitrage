@@ -5,13 +5,17 @@ import logging
 from sys import exit
 import config as conf
 # Log Formatter
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, filename='blib.log')
+logging.basicConfig(
+    format='%(levelname)s:%(message)s',
+    level=logging.DEBUG,
+    filename='blib.log')
 # local imports
 import bittrex
 
 key = conf.bittrexKey
 secret = conf.bittrexSecret
-debug=True
+debug = True
+
 
 def ticker(pair):
     api = bittrex.bittrex(key, secret)
@@ -23,12 +27,14 @@ def ticker(pair):
         t = api.getticker(pair)
     except Exception as err:
         logging.error(err)
-        eprint('Error getting ticker data: '+str(err))
+        eprint('Error getting ticker data: ' + str(err))
         return False
     else:
         tt = json.dumps(t)
-        if debug: print(tt)
+        if debug:
+            print(tt)
         return(tt)
+
 
 def get_deposit_address(currency):
     api = bittrex.bittrex(key, secret)
@@ -39,14 +45,15 @@ def get_deposit_address(currency):
         add = api.getdepositaddress(currency)
     except Exception as err:
         logging.error(err)
-        eprint("Error getting deposit address: "+ str(err))
+        eprint("Error getting deposit address: " + str(err))
         return False
     else:
         add_ = json.dumps(add)
         return add_
-    
+
+
 def balances():
-    
+
     api = bittrex.bittrex(key, secret)
     try:
         bals = api.getbalances()
@@ -57,7 +64,8 @@ def balances():
     else:
         bals = json.dumps(bals)
         return bals
-    
+
+
 def get_balance(currency):
     api = bittrex.bittrex(key, secret)
     if currency == 'null':
@@ -73,7 +81,8 @@ def get_balance(currency):
         bal = json.dumps(bal)
         return bal
 
-def get_order_book(pair,otype,depth=20):
+
+def get_order_book(pair, otype, depth=20):
     api = bittrex.bittrex(key, secret)
     pair = str(pair)
     otype = str(otype)
@@ -82,11 +91,12 @@ def get_order_book(pair,otype,depth=20):
         ret = api.getorderbook(pair, otype, depth)
     except Exception as err:
         eprint("Error getting orderbook")
-        logging.info("Error getting orderbook: "+ str(err))
+        logging.info("Error getting orderbook: " + str(err))
     else:
         ret = json.dumps(ret)
-        
+
         return ret
+
 
 def buy(pair, amount, price):
     api = bittrex.bittrex(key, secret)
@@ -103,13 +113,14 @@ def buy(pair, amount, price):
         ret = api.buylimit(pair, amount, price)
     except Exception as err:
         logging.info(err)
-        eprint('Error placing buy limit order: '+ str(err))
+        eprint('Error placing buy limit order: ' + str(err))
         return False
     else:
         #ret = json.dumps(ret)
         #ret = json.loads(ret)
         ret = ret['uuid']
         return(ret)
+
 
 def sell(pair, amount, price):
     api = bittrex.bittrex(key, secret)
@@ -126,7 +137,7 @@ def sell(pair, amount, price):
         ret = api.selllimit(pair, amount, price)
     except Exception as err:
         logging.info(err)
-        eprint('Error placing sell limit order: '+ str(err))
+        eprint('Error placing sell limit order: ' + str(err))
         return False
     else:
         ret = json.dumps(ret)
@@ -135,8 +146,9 @@ def sell(pair, amount, price):
 
         return(ret)
 
+
 def buy_market_order(pair, amount):
-#
+    #
     #
     api = bittrex.bittrex(key, secret)
     if pair == 'null':
@@ -146,29 +158,7 @@ def buy_market_order(pair, amount):
         eprint('Specify an amount with -a')
         return False
     try:
-        ret = api.buymarket(pair,amount)
-    except Exception as err:
-       eprint(err)
-       logging.info(err)
-    else:
-       try:
-           ret = json.dumps(ret)
-       except Exception as err:
-           logging.info(err)
-       else:
-           return(ret)
-
-
-def sell_market_order(pair, amount):
-    api = bittrex.bittrex(key, secret)
-    if pair == 'null':
-        eprint('Specify a pair with -p')
-        return False
-    if amount == '0.0':
-        eprint('Specify an amount with -a')
-        return False
-    try:
-        ret = api.sellmarket(pair,amount)
+        ret = api.buymarket(pair, amount)
     except Exception as err:
         eprint(err)
         logging.info(err)
@@ -181,6 +171,27 @@ def sell_market_order(pair, amount):
             return(ret)
 
 
+def sell_market_order(pair, amount):
+    api = bittrex.bittrex(key, secret)
+    if pair == 'null':
+        eprint('Specify a pair with -p')
+        return False
+    if amount == '0.0':
+        eprint('Specify an amount with -a')
+        return False
+    try:
+        ret = api.sellmarket(pair, amount)
+    except Exception as err:
+        eprint(err)
+        logging.info(err)
+    else:
+        try:
+            ret = json.dumps(ret)
+        except Exception as err:
+            logging.info(err)
+        else:
+            return(ret)
+
 
 def cancel(order_id):
     api = bittrex.bittrex(key, secret)
@@ -191,11 +202,12 @@ def cancel(order_id):
         ret = api.cancel(order_id)
     except Exception as err:
         logging.info(err)
-        eprint('Error canceling order: '+ str(err))
+        eprint('Error canceling order: ' + str(err))
         return False
     else:
         ret = json.dumps(ret)
         return(ret)
+
 
 def do_withdraw(currency, amount, address):
     api = bittrex.bittrex(key, secret)
@@ -209,7 +221,7 @@ def do_withdraw(currency, amount, address):
         eprint('Specify an address with -A !')
         return False
     print('Please review the following information carefully!')
-    print('Currency: ' +str(currency))
+    print('Currency: ' + str(currency))
     print('Address: ' + str(address))
     print('Amount: ' + str(amount))
     do_it = input("Proceed? (YES/NO) :")
@@ -228,6 +240,7 @@ def do_withdraw(currency, amount, address):
         logging.info('Function: do_withdraw : Withdrawal canceled')
         return False
 
+
 def wd_history(currency, count=10):
     api = bittrex.bittrex(key, secret)
     if currency == 'null':
@@ -241,11 +254,12 @@ def wd_history(currency, count=10):
     else:
         ret = json.dumps(ret)
         return(ret)
-    
+
+
 def orders(pair):
     api = bittrex.bittrex(key, secret)
     if pair == 'null':
-        pair=''
+        pair = ''
     try:
         ret = api.getopenorders(pair)
     except Exception as err:
@@ -255,42 +269,47 @@ def orders(pair):
         ret = json.dumps(ret)
         return(ret)
 
+
 def getcurrencies():
-    api =  bittrex.bittrex(key, secret)
+    api = bittrex.bittrex(key, secret)
     try:
         ret = api.getcurrencies()
     except Exception as err:
         logging.info(err)
-        eprint('Error getting currency data'+ str(err))
+        eprint('Error getting currency data' + str(err))
     else:
         ret = json.dumps(ret)
         print(ret)
 
-def deposithistory(currency,count=10):
+
+def deposithistory(currency, count=10):
     api = bittrex.bittrex(key, secret)
 
     if currency == 'null':
-        currency=''
-    
+        currency = ''
+
     try:
-        ret = api.getdeposithistory(currency,count)
+        ret = api.getdeposithistory(currency, count)
     except Exception as err:
         logging.info(err)
-        eprint('Error getting deposit history' +str(err))
+        eprint('Error getting deposit history' + str(err))
     else:
         ret = json.dumps(ret)
         print(ret)
 
-def orderHist(pair,count=10):
+
+def orderHist(pair, count=10):
     api = bittrex.bittrex(key, secret)
-    if pair == 'null' : pair=''
+    if pair == 'null':
+        pair = ''
     try:
-        ret = api.getorderhistory(pair,count)
+        ret = api.getorderhistory(pair, count)
     except Exception as err:
         logging.info(err)
     else:
         ret = json.dumps(pair)
         print(ret)
+
 
 def query_order(order_id):
     api = bittrex.bittrex(key, secret)
@@ -298,12 +317,11 @@ def query_order(order_id):
         eprint('Specify an order id (uuid) with -i')
         return False
     else:
-       try:
-          ret = api.getorder(order_id)
-       except Exception as err:
-          eprint('Error getting order history: ' + str(err))
-          return False
-       else:
-          ret = json.dumps(ret)
-          return(ret)
-
+        try:
+            ret = api.getorder(order_id)
+        except Exception as err:
+            eprint('Error getting order history: ' + str(err))
+            return False
+        else:
+            ret = json.dumps(ret)
+            return(ret)

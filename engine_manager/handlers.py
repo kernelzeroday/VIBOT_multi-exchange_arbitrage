@@ -1,9 +1,8 @@
 import os
 import json
 import subprocess
-from utils.helpers import get_config, get_pids, set_pids,  list_to_string, params_to_flags
+from utils.helpers import get_config, get_pids, set_pids, list_to_string, params_to_flags
 from config import CMD_MAP
-
 
 
 def exec(*command, stdout_on=False, cwd=None):
@@ -25,13 +24,13 @@ def start_handler(engine, params, first_disable=True):
         exec('cd ..', '&&', 'cd %s' % path, '&&', run_cmd, flags)
         pids = list(filter(
             None, exec('sudo', 'pgrep', '-f', 'scraper.go', stdout_on=True)
-                .split('\n')))
+            .split('\n')))
         assert pids
         set_pids(engine, pids)
-        return {'success':True, 'text':'Vibot started pid: %s' % pids}
+        return {'success': True, 'text': 'Vibot started pid: %s' % pids}
     except Exception as e:
-        #todo: add log here
-        return {'success':False, 'error':str(e)}
+        # todo: add log here
+        return {'success': False, 'error': str(e)}
 
 
 def _disable_engine(engine):
@@ -42,15 +41,17 @@ def _disable_engine(engine):
     except Exception as e:
         msg = 'Cancelation %s engine error: %s' % (engine, str(e))
         print(msg)
-        #todo: add log here
+        # todo: add log here
+
 
 def stop_handler(engine):
     print('stop_handler')
     try:
         _disable_engine(engine)
     except Exception as e:
-        #todo: add log here
-        return {'success':False, 'error':str(e)}
+        # todo: add log here
+        return {'success': False, 'error': str(e)}
+
 
 def pause_handler(state, params=None):
     engine = 'scraper'
@@ -61,8 +62,9 @@ def pause_handler(state, params=None):
             start_handler(engine, params, first_disable=False)
         return {'success': True, 'text': 'Successful %s' % state}
     except Exception as e:
-        #todo: add log here
+        # todo: add log here
         raise Exception('Cancelation %s engine error: %s' % (engine, str(e)))
+
 
 def update_config_handler(data):
     print('update_config: %s' % (data))

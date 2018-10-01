@@ -10,7 +10,9 @@ import config
 import json
 import sys
 import pprint
-debug=False
+debug = False
+
+
 def mqConnect(client, userdata, flags, rc):
     """ MQTT Connect Event Listener
     :param client:      Client instance
@@ -44,17 +46,25 @@ def mqDisconnect(client, userdata, rc):
         print("Error: Unexpected Disconnection")
 
 
-def mqPublish(msg,topic='ticker'):
+def mqPublish(msg, topic='ticker'):
     global CLIENTS
     client = mqtt.Client(client_id="ticker", clean_session=False)
     if not client:
         raise ValueError("Could not find an MQTT Client.")
     #client = mqtt.Client()
     client.username_pw_set(username=config.mq_user, password=config.mq_pass)
-    #client.connect("localhost",1883,60)
+    # client.connect("localhost",1883,60)
     #publish.single(topic, str(msg));
-    publish.single(topic, str(msg), hostname=config.mq_host, port=config.mq_port, auth = {'username': config.mq_user, 'password': config.mq_pass})
-    #client.disconnect();
+    publish.single(
+        topic,
+        str(msg),
+        hostname=config.mq_host,
+        port=config.mq_port,
+        auth={
+            'username': config.mq_user,
+            'password': config.mq_pass})
+    # client.disconnect();
+
 
 def mqParse(client, userdata, message):
     """ MQTT Connect Event Listener
@@ -85,107 +95,115 @@ def mqParse(client, userdata, message):
         print(err)
         pass
     else:
-           
+
         exchange = 'bittrex'
         try:
             pair = bittrex['Pair']
-        except:
+        except BaseException:
             pass
         try:
             bidPrice = bittrex['MaxBid']['Price']
-        except:
+        except BaseException:
             pass
         try:
             askPrice = bittrex['MinAsk']['Price']
-        except:
+        except BaseException:
             pass
         try:
-            t = str('{"exchange":"%s","Market":\"%s\","Ask":"%s","Bid":"%s"}' %(exchange,pair,askPrice,bidPrice))
+            t = str(
+                '{"exchange":"%s","Market":\"%s\","Ask":"%s","Bid":"%s"}' %
+                (exchange, pair, askPrice, bidPrice))
             #t = json.dumps({'exchange': exchange, 'Market': pair, 'Ask': askPrice, 'Bid': bidPrice},sort_keys=False)
             #t = json.loads(t)
         except Exception as err:
-            #print(err)
+            # print(err)
             pass
         else:
             mqPublish(t)
-            if debug: print(t)
-            topic=str('ticker'+'/'+str(exchange)+'/'+str(pair))
-            if debug:print(topic)
-            mqPublish(t,topic)
-            #return
+            if debug:
+                print(t)
+            topic = str('ticker' + '/' + str(exchange) + '/' + str(pair))
+            if debug:
+                print(topic)
+            mqPublish(t, topic)
+            # return
 
-    
     try:
-            poloniex = obj['poloniex']
+        poloniex = obj['poloniex']
     except Exception as err:
-            print(err)
-            pass
+        print(err)
+        pass
     else:
         exchange = 'poloniex'
         try:
             pair = poloniex['Pair']
-        except:
+        except BaseException:
             pass
         try:
             bidPrice = poloniex['MaxBid']['Price']
-        except:
+        except BaseException:
             pass
-        
+
         try:
             askPrice = poloniex['MinAsk']['Price']
-        except:
+        except BaseException:
             pass
-        
+
         try:
             #t = json.dumps({'exchange': exchange, 'Market': pair, 'Ask': askPrice, 'Bid': bidPrice},sort_keys=False)
             #t = json.loads(t)
-            t = str('{"exchange":"%s","Market":\"%s\","Ask":"%s","Bid":"%s"}' %(exchange,pair,askPrice,bidPrice))
+            t = str(
+                '{"exchange":"%s","Market":\"%s\","Ask":"%s","Bid":"%s"}' %
+                (exchange, pair, askPrice, bidPrice))
         except Exception as err:
-            #print(err)
+            # print(err)
             pass
         else:
             mqPublish(t)
-            if debug: print(t)
-            topic=str('ticker'+'/'+str(exchange)+'/'+str(pair))
-            if debug:print(topic)
-            mqPublish(t,topic)
-            #return
+            if debug:
+                print(t)
+            topic = str('ticker' + '/' + str(exchange) + '/' + str(pair))
+            if debug:
+                print(topic)
+            mqPublish(t, topic)
+            # return
 
-        
     try:
         cex = obj['cex']
     except Exception as err:
-        #print(err)
+        # print(err)
         pass
     else:
         exchange = 'cex'
         try:
             pair = cex['Pair']
-        except:
+        except BaseException:
             pass
         try:
             bidPrice = cex['MaxBid']['Price']
-        except:
+        except BaseException:
             pass
         try:
             askPrice = cex['MinAsk']['Price']
-        except:
+        except BaseException:
             pass
         try:
             #t = json.dumps({'exchange': exchange, 'Market': pair, 'Ask': askPrice, 'Bid': bidPrice},sort_keys=False)
             #t = json.loads(t)
-            t = str('{"exchange":"%s","Market":\"%s\","Ask":"%s","Bid":"%s"}' %(exchange,pair,askPrice,bidPrice))
+            t = str(
+                '{"exchange":"%s","Market":\"%s\","Ask":"%s","Bid":"%s"}' %
+                (exchange, pair, askPrice, bidPrice))
         except Exception as err:
             print(err)
         else:
-            #mqPublish(t)
-            if debug: print(t)
-            topic=str('ticker'+'/'+str(exchange)+'/'+str(pair))
-            if debug:print(topic)
-            mqPublish(t,topic=topic)
-            #return
-
-
+            # mqPublish(t)
+            if debug:
+                print(t)
+            topic = str('ticker' + '/' + str(exchange) + '/' + str(pair))
+            if debug:
+                print(topic)
+            mqPublish(t, topic=topic)
+            # return
 
 
 def mqStart(streamId):
@@ -202,17 +220,21 @@ def mqStart(streamId):
     client.on_message = mqParse
     # Client.message_callback_add(sub, callback) TODO Do we want individual handlers?
     # Connect to Broker
-    client.connect(config.mq_host, port=config.mq_port,
-                   keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+    client.connect(
+        config.mq_host,
+        port=config.mq_port,
+        keepalive=config.mq_keepalive,
+        bind_address=config.mq_bindAddress)
     # Subscribe to Topics
     client.subscribe("/ticker/#")  # TODO Discuss QoS States
     client.loop_start()
     return client
 
-mq_pubtop='ticker'
+
+mq_pubtop = 'ticker'
 client = mqStart("tickerbot")
 
-while 1:
+while True:
     try:
         time.sleep(1)
     except KeyboardInterrupt:

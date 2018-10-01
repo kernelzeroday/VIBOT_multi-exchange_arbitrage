@@ -1,8 +1,15 @@
 #!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 print('[*] Starting Order Tracking Engine...')
-mq_pubtop='Tracking'
-import time,os,sys,json,threading,logging,signal,random
+mq_pubtop = 'Tracking'
+import time
+import os
+import sys
+import json
+import threading
+import logging
+import signal
+import random
 import paho.mqtt.client as mqtt
 import config
 import bittrex
@@ -13,11 +20,11 @@ from base64 import b64encode, b64decode
 from json import dumps, loads, JSONEncoder
 import pickle
 # vars
-verbose=True
-debug=True
-simulate=False
-mq_on=True
-count=0
+verbose = True
+debug = True
+simulate = False
+mq_on = True
+count = 0
 maxThreads = 10000
 # logger stuff
 logger = logging.getLogger(__name__)
@@ -25,36 +32,48 @@ logger.setLevel(logging.INFO)
 handler = logging.FileHandler('orderTracking.log')
 handler.setLevel(logging.INFO)
 # create a logging format
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(handler)
 # singal handler for ctl+c
+
+
 def signal_handler(signal, frame):
     print("\nprogram exiting gracefully")
     sys.exit(0)
 
+
 signal.signal(signal.SIGINT, signal_handler)
 
 # json hack (not currently used)
+
+
 class PythonObjectEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
             return super().default(obj)
         return {'_python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
 
+
 def as_python_object(dct):
     if '_python_object' in dct:
         return pickle.loads(b64decode(dct['_python_object'].encode('utf-8')))
     return dct
 # return unix time
+
+
 def tS():
     return time.time()
 # print to stderr
+
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-def get_ticker(exchange,pair):
+
+def get_ticker(exchange, pair):
     def bittrex_ticker(pair):
         bittrexAPI = bittrex.bittrex(config.bittrexKey, config.bittrexSecret)
         pair = str(pair)
@@ -65,7 +84,7 @@ def get_ticker(exchange,pair):
             t = bittrexAPI.getticker(pair)
         except Exception as err:
             logger.error(err)
-            eprint('Error getting ticker data: '+str(err))
+            eprint('Error getting ticker data: ' + str(err))
             return False
         else:
             tt = json.dumps(t)
@@ -74,15 +93,15 @@ def get_ticker(exchange,pair):
             return(tt)
 
     def polo_ticker(pair):
-        data = poloniex.Poloniex(config.poloniexKey,config.poloniexSecret)
+        data = poloniex.Poloniex(config.poloniexKey, config.poloniexSecret)
         ticker = data.returnTicker()
         # this fixes json!
-        ret = json.dumps(ticker[pair],cls=PythonObjectEncoder)
-        ret = json.loads(ret,object_hook=as_python_object)
+        ret = json.dumps(ticker[pair], cls=PythonObjectEncoder)
+        ret = json.loads(ret, object_hook=as_python_object)
         ret = ret['last']
-        logger.info("Ticker call: "+str(ret))
+        logger.info("Ticker call: " + str(ret))
         return(ret)
-    
+
     def cex_ticker(pair):
         try:
             pair = str(pair)
@@ -94,7 +113,7 @@ def get_ticker(exchange,pair):
         except Exception as err:
             print("Error: %s" % err)
             return False
-    
+
     if exchange == 'poloniex':
         ticker = polo_ticker(pair)
     elif exchange == 'cex':
@@ -103,14 +122,17 @@ def get_ticker(exchange,pair):
         ticker = bittrex_ticker(pair)
     else:
         return('Invalid Exchange')
-    if debug:print('[i] Ticker call...' + str(ticker))
-    if ticker: return(ticker)
+    if debug:
+        print('[i] Ticker call...' + str(ticker))
+    if ticker:
+        return(ticker)
 
 
 # main cancel order function
-def cancel_order(exchange,orderID):
-    logger.info('Cancel order: %s on %s' %(orderID,exchange))
+def cancel_order(exchange, orderID):
+    logger.info('Cancel order: %s on %s' % (orderID, exchange))
     # sub functions for each exchange
+
     def cancel_bittrex(order_id):
         bittrexAPI = bittrex.bittrex(config.bittrexKey, config.bittrexSecret)
         try:
@@ -124,12 +146,13 @@ def cancel_order(exchange,orderID):
                 mqPublish('[*] Successfully canceled order %s' % order_id)
                 return True
             else:
-                if debug: print("[!] Failed cancel bittrex order call: "+str(ret))
+                if debug:
+                    print("[!] Failed cancel bittrex order call: " + str(ret))
                 return False
 
-
     def cancel_poloniex(order_id):
-        poloniexAPI = poloniex.Poloniex(config.poloniexKey,config.poloniexSecret)
+        poloniexAPI = poloniex.Poloniex(
+            config.poloniexKey, config.poloniexSecret)
         try:
             ret = poloniexAPI.cancelOrder(order_id)
         except Exception as err:
@@ -151,73 +174,87 @@ def cancel_order(exchange,orderID):
             return False
         else:
             #ret = json.dumps(ret)
-            logger.info("Successfully canceled cex order" +str(ret))
+            logger.info("Successfully canceled cex order" + str(ret))
             #if debug: print("[*] Cancel cex order call: "+str(ret))
-            mqPublish("[*] Successfully canceled cex order: "+str(ret))
+            mqPublish("[*] Successfully canceled cex order: " + str(ret))
             return True
     # simulation mode
     if simulate:
-        print("[*] (simulation) Canceling order: %s on exchange: %s" % (orderID,exchange))
+        print(
+            "[*] (simulation) Canceling order: %s on exchange: %s" %
+            (orderID, exchange))
         return True
     else:
         # live mode
         if exchange == 'bittrex':
             ret = cancel_bittrex(orderID)
-            if ret: return True
+            if ret:
+                return True
         if exchange == 'poloniex':
             ret = cancel_poloniex(orderID)
-            if ret: return True
+            if ret:
+                return True
         if exchange == 'cex':
             ret = cancel_cex(orderID)
-            if ret: return True
+            if ret:
+                return True
     #if debug: print(ret)
     mqPublish(ret)
 
-def viable(mode,orig,new):
-    if debug: print("[i] DEBUG: " +str(mode) + " " + str(orig)+ " " +str(new))
+
+def viable(mode, orig, new):
+    if debug:
+        print("[i] DEBUG: " + str(mode) + " " + str(orig) + " " + str(new))
     if mode == 'sell':
         decrease = float(orig) - float(new)
         pct = float(decrease) / float(orig) * float(100.00)
-        if float(pct) <= 0.5 and float(pct) > 0.0 :
-           if debug: print('[i] : Viable:' + str(pct))
-           return True
+        if float(pct) <= 0.5 and float(pct) > 0.0:
+            if debug:
+                print('[i] : Viable:' + str(pct))
+            return True
         else:
-           if debug:print("[i] Pct was: " +str(pct))
-           return False
+            if debug:
+                print("[i] Pct was: " + str(pct))
+            return False
     elif mode == 'buy':
         increase = float(new) - float(orig)
         pct = float(increase) / float(orig) * float(100)
         if float(pct) <= 0.25 and float(pct) > 0.0:
-            if debug: print('[i] : Viable: ' + str(pct))
+            if debug:
+                print('[i] : Viable: ' + str(pct))
             return True
         else:
-            if debug:print("[i] Pct was: " +str(pct))
+            if debug:
+                print("[i] Pct was: " + str(pct))
             return False
     else:
-       logger.info('Error: Invalid mode.')
-       return False
+        logger.info('Error: Invalid mode.')
+        return False
     #if debug:print("Pct was: " +str(pct))
 
 # que order, check until expired using entropy to throw off analysis
-def que_Order(exchange,expire,orderID,type_,price,pair):
-    t = random.randint(1,30)
-    vt = random.randint(30,90)
+
+
+def que_Order(exchange, expire, orderID, type_, price, pair):
+    t = random.randint(1, 30)
+    vt = random.randint(30, 90)
     while True:
         if float(expire) <= tS():
-            current = get_ticker(exchange,pair)
+            current = get_ticker(exchange, pair)
             mode = str(type_)
-            if viable(mode,price,current):
-                mqPublish('[*] Order still viable, not canceling for: %.8f seconds!' % vt)
+            if viable(mode, price, current):
+                mqPublish(
+                    '[*] Order still viable, not canceling for: %.8f seconds!' %
+                    vt)
                 logger.info('Sleeping for %.8f seconds' % vt)
                 time.sleep(vt)
             else:
                 mqPublish('[*] %s order timed out, canceling...' % exchange)
                 logger.info('%s order timed out, canceling...' % exchange)
-                ret = cancel_order(exchange,orderID)
+                ret = cancel_order(exchange, orderID)
                 break
         else:
             time.sleep(t)
-
 
 
 # connect to MqTT Stream
@@ -240,6 +277,8 @@ def mqConnect(client, userdata, flags, rc):
         print("[!] Refused %s" % rc)
 
 # Disconnect from mqtt
+
+
 def mqDisconnect(client, userdata, rc):
     """ MQTT Connect Event Listener
     :param client:      Client instance
@@ -254,6 +293,8 @@ def mqDisconnect(client, userdata, rc):
         print("[!] Error: Unexpected Disconnection")
 
 # On message function. Main logic here
+
+
 def mqParse(client, userdata, message):
     """ MQTT Connect Event Listener
     :param client:      Client instance
@@ -287,9 +328,9 @@ def mqParse(client, userdata, message):
         obj = json.loads(str(message.payload.decode('UTF-8')))
     except Exception as err:
         eprint('ERROR: %s error loading json!' % err)
-        bad_data=True
+        bad_data = True
     else:
-        bad_data=False
+        bad_data = False
         #if debug: print(obj)
     # Parse the object
     if not bad_data:
@@ -300,35 +341,35 @@ def mqParse(client, userdata, message):
             return False
         try:
             orderID = obj['OrderID']
-        except:
+        except BaseException:
             eprint('Error parsing OrderID from object')
             return False
         try:
             kind = obj['Kind']
-        except:
+        except BaseException:
             eprint('Error parsing Kind from object')
             return False
         try:
             expires = obj['Expires']
-        except:
+        except BaseException:
             eprint('Error parsing Expires from object')
             return False
         try:
             price = obj['Price']
-        except:
+        except BaseException:
             eprint('Error parsing Price from object')
             return False
         try:
             _type = obj['Type']
-        except:
+        except BaseException:
             eprint('Error parsing Type from object')
             return False
         try:
             pair = obj['Pair']
-        except:
+        except BaseException:
             eprint('Error parsing Pair from object')
             return False
-            
+
     # declare as string variables
     try:
         kind_ = str(kind)
@@ -343,34 +384,48 @@ def mqParse(client, userdata, message):
     # Received an order, prepare to que
     if kind_ == 'Limit':
         if verbose or debug or mq_on:
-            mqPublish("[*] Tracking new order on exchange %s : %s , expires %s " % (exchange_,orderID_,expires_))
+            mqPublish(
+                "[*] Tracking new order on exchange %s : %s , expires %s " %
+                (exchange_, orderID_, expires_))
         with open('pending.log', 'a') as f:
-            f.write("""'{"OrderID":%s,"Type":%s,"Price":%s}'\n""" % (orderID,_type,pair_))
-        threads=[]
-        count=0
+            f.write(
+                """'{"OrderID":%s,"Type":%s,"Price":%s}'\n""" %
+                (orderID, _type, pair_))
+        threads = []
+        count = 0
 
-        #TODO: thread tracking
-        
-        if count>int(maxThreads):
+        # TODO: thread tracking
+
+        if count > int(maxThreads):
             print("[*] Stopping because reached max threads (%s)" % maxThreads)
             logger.info('Too many threads open!')
             return
         else:
-            t = threading.Thread(target=que_Order, args=(exchange_,expires_,orderID_,_type_,price_,pair_ ))
+            t = threading.Thread(
+                target=que_Order,
+                args=(
+                    exchange_,
+                    expires_,
+                    orderID_,
+                    _type_,
+                    price_,
+                    pair_))
             t.start()
-            count+=1
+            count += 1
         if count % 10 == 0:
             activeThreads = (threading.active_count())
             print("[*] Processed %s orders" % activeThreads)
 
     if kind == 'Limit':
-        mqPublish('[*] Order %s on exchange %s qued in thread for canceling' % (orderID_,exchange_))
-        logger.info('Order %s on exchange %s qued in thread for canceling' % (orderID_,exchange_))
+        mqPublish(
+            '[*] Order %s on exchange %s qued in thread for canceling' %
+            (orderID_, exchange_))
+        logger.info(
+            'Order %s on exchange %s qued in thread for canceling' %
+            (orderID_, exchange_))
 
 
-
-
-#TODO: Publish Canceled Order Info to stream ('canceled')?
+# TODO: Publish Canceled Order Info to stream ('canceled')?
 def mqPublish(payload, topic=mq_pubtop, qos=0, retain=False):
     """ MQTT Publish Message to a Topic
     :param id           String of the Client ID
@@ -389,7 +444,8 @@ def mqPublish(payload, topic=mq_pubtop, qos=0, retain=False):
     client = mqtt.Client('trackpub', clean_session=False)
     if not client:
         raise ValueError("Could not find an MQTT Client matching %s" % id)
-    if debug:print(payload)
+    if debug:
+        print(payload)
     client.publish('tracking', payload=payload, qos=qos, retain=retain)
 
 
@@ -407,8 +463,11 @@ def mqStart(streamId):
     client.on_message = mqParse
     # Client.message_callback_add(sub, callback) TODO Do we want individual handlers?
     # Connect to Broker
-    client.connect(config.mq_host, port=config.mq_port,
-                   keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+    client.connect(
+        config.mq_host,
+        port=config.mq_port,
+        keepalive=config.mq_keepalive,
+        bind_address=config.mq_bindAddress)
     # Subscribe to Topics
     client.subscribe("verified")  # TODO Discuss QoS States
     client.loop_start()
@@ -416,7 +475,7 @@ def mqStart(streamId):
 
 
 client = mqStart("verified")
-#mq_pubtop='tracking'
+# mq_pubtop='tracking'
 # just loop some sh*t to keep this open on the CLI
 while 1:
     try:
@@ -424,4 +483,3 @@ while 1:
     except KeyboardInterrupt:
         print('[*] Caught Signal, exiting gracefully.\nBye!')
         sys.exit(0)
-

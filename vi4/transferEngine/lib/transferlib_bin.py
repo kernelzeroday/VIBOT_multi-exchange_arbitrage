@@ -18,23 +18,28 @@ from base64 import b64encode, b64decode
 from json import dumps, loads, JSONEncoder
 import pickle
 # local libs
-import bittrex #TODO: update to v2 api
+import bittrex  # TODO: update to v2 api
 import config
-import cex # custom modified version of python-cexio
+import cex  # custom modified version of python-cexio
 from binance.client import Client
 
 
 # define exchanges
-wdex=str('poloniex bittrex binance')
-dpex=str('cex poloniex bittrex binance')
+wdex = str('poloniex bittrex binance')
+dpex = str('cex poloniex bittrex binance')
 proceed = 'YES'
 # log formatting
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, filename='transfers.log')
+logging.basicConfig(
+    format='%(levelname)s:%(message)s',
+    level=logging.DEBUG,
+    filename='transfers.log')
 
 # Modular Class to Serialize Json
 
+
 def debug():
     return False
+
 
 class PythonObjectEncoder(JSONEncoder):
     def default(self, obj):
@@ -42,23 +47,29 @@ class PythonObjectEncoder(JSONEncoder):
             return super().default(obj)
         return {'_python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
 
+
 def as_python_object(dct):
     if '_python_object' in dct:
         return pickle.loads(b64decode(dct['_python_object'].encode('utf-8')))
     return dct
 
 # print to stderr
+
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 # generate a time stamp
+
+
 def tS():
     return time.time()
 
 # do a withdrawal - nested functions
 
-def _withdraw(live,exchange,currency,amount,address,payment_id=None):
 
-    def bittrex_withdraw(live, currency, amount, address,payment_id=None):
+def _withdraw(live, exchange, currency, amount, address, payment_id=None):
+
+    def bittrex_withdraw(live, currency, amount, address, payment_id=None):
         bittrexAPI = bittrex.bittrex(config.bittrexKey, config.bittrexSecret)
         logging.info('Bittrex Withdrawal call initiated')
         if not currency:
@@ -68,17 +79,18 @@ def _withdraw(live,exchange,currency,amount,address,payment_id=None):
         if not address:
             return False
         if payment_id and live == '0':
-            if debug: print('[!] Warning: attempting new payment id functionality...')
+            if debug:
+                print('[!] Warning: attempting new payment id functionality...')
             try:
-                ret = bittrexAPI.withdraw(currency, amount, address, payment_id)
+                ret = bittrexAPI.withdraw(
+                    currency, amount, address, payment_id)
             except Exception as err:
                 logging.error(err)
                 eprint('Error withdrawing currency: ' + str(err))
             else:
                 ret = json.dumps(ret)
                 print(ret)
-                return('INFO:'  + str(tS) + ' Withdrawal: ' + str(ret))
-
+                return('INFO:' + str(tS) + ' Withdrawal: ' + str(ret))
 
         elif not payment_id and live == '0':
             try:
@@ -90,13 +102,14 @@ def _withdraw(live,exchange,currency,amount,address,payment_id=None):
             else:
                 ret = json.dumps(ret)
                 print(ret)
-                return('INFO:'  + str(tS) + ' Withdrawal: ' + str(ret))
+                return('INFO:' + str(tS) + ' Withdrawal: ' + str(ret))
         else:
-            return(str('Canceled Withdrawal of currency: %s , amount: %s to address: %s ') %(currency,amount,address) )
+            return(str('Canceled Withdrawal of currency: %s , amount: %s to address: %s ') % (currency, amount, address))
             logging.info('Function: do_withdraw : Withdrawal canceled')
 
-    def poloniex_withdraw(live, currency,amount,address,payment_id=None):
-        poloniexAPI = poloniex.Poloniex(config.poloniexKey,config.poloniexSecret)
+    def poloniex_withdraw(live, currency, amount, address, payment_id=None):
+        poloniexAPI = poloniex.Poloniex(
+            config.poloniexKey, config.poloniexSecret)
         logging.info('Poloniex withdrawal call initiated')
         if not currency:
             return False
@@ -109,33 +122,35 @@ def _withdraw(live,exchange,currency,amount,address,payment_id=None):
         if live == '0':
             try:
                 if payment_id:
-                    ret = poloniexAPI.withdraw(currency, amount, address, payment_id)
+                    ret = poloniexAPI.withdraw(
+                        currency, amount, address, payment_id)
                 else:
-                     ret = poloniexAPI.withdraw(currency, amount, address)
+                    ret = poloniexAPI.withdraw(currency, amount, address)
             except Exception as seriouserror:
                 logging.info('Error withdrawing!' + str(seriouserror))
             else:
                 ret = json.dumps(ret, cls=PythonObjectEncoder)
                 print(ret)
-                return('INFO:'  + str(tS) + ' Withdrawal: ' + str(ret))
+                return('INFO:' + str(tS) + ' Withdrawal: ' + str(ret))
 
         else:
             if payment_id:
-                return('Canceling poloniex withdrawl of curreny: %s amount %s to address %s , payment_id: %s' % (currency,amount,address,payment_id))
+                return('Canceling poloniex withdrawl of curreny: %s amount %s to address %s , payment_id: %s' % (currency, amount, address, payment_id))
             else:
-                return('Canceling poloniex withdrawl of curreny: %s amount %s to address %s' % (currency,amount,address))
-            
+                return('Canceling poloniex withdrawl of curreny: %s amount %s to address %s' % (currency, amount, address))
+
     def binance_withdraw(currency, amount, address):
         binanceApi = Client(config.binanceKey, config.binanceSecret)
         if not currency:
-            
+
             return False
         if not amount:
             return False
         if not address:
             return False
         try:
-            ret = binanceApi.withdraw(asset=currency, address=address, amount=amount)
+            ret = binanceApi.withdraw(
+                asset=currency, address=address, amount=amount)
         except Exception as err:
             logging.error(err)
             eprint('Error withdrawing currency: ' + str(err))
@@ -146,20 +161,19 @@ def _withdraw(live,exchange,currency,amount,address,payment_id=None):
 
     if payment_id:
         if exchange == 'poloniex':
-            poloniex_withdraw(live, currency,amount,address,payment_id)
+            poloniex_withdraw(live, currency, amount, address, payment_id)
         if exchange == 'bittrex':
-            bittrex_withdraw(live, currency,amount,address,payment_id)
-        #TODO: payment id for binance
+            bittrex_withdraw(live, currency, amount, address, payment_id)
+        # TODO: payment id for binance
     else:
         if exchange == 'poloniex':
-            poloniex_withdraw(live, currency,amount,address)
+            poloniex_withdraw(live, currency, amount, address)
         if exchange == 'bittrex':
-            bittrex_withdraw(live, currency,amount,address)
+            bittrex_withdraw(live, currency, amount, address)
         if exchange == 'binance':
-            binance_withdraw(currency,amount,address)
+            binance_withdraw(currency, amount, address)
 
-
-    print('Currency:' +str(currency))
+    print('Currency:' + str(currency))
     print('Amount :' + str(amount))
     print('Address: ' + str(address))
     if payment_id:
@@ -167,23 +181,25 @@ def _withdraw(live,exchange,currency,amount,address,payment_id=None):
 
 # get deposit addresses - nested functions
 
-def deposit_address(exchange,currency):
+
+def deposit_address(exchange, currency):
 
     def poloniex_address(currency):
-        poloniexAPI = poloniex.Poloniex(config.poloniexKey,config.poloniexSecret)
+        poloniexAPI = poloniex.Poloniex(
+            config.poloniexKey, config.poloniexSecret)
         logging.info('Get deposit address call')
         try:
             ret = poloniexAPI.returnDepositAddresses()
         except Exception as err:
             logging.info(err)
-            eprint("Error getting deposit address: "+ str(err))
+            eprint("Error getting deposit address: " + str(err))
         else:
             ret = json.dumps(ret, cls=PythonObjectEncoder)
             ret = json.loads(ret, object_hook=as_python_object)
             try:
                 ret = ret[currency]
             except KeyError as err:
-               eprint('Key error'+str(err))
+                eprint('Key error' + str(err))
             return(ret)
 
     def bittrex_address(currency):
@@ -192,7 +208,7 @@ def deposit_address(exchange,currency):
             add = bittrexAPI.getdepositaddress(currency)
         except Exception as err:
             logging.error(err)
-            eprint("Error getting deposit address: "+ str(err))
+            eprint("Error getting deposit address: " + str(err))
             return False
         else:
             add = json.dumps(add)
@@ -206,12 +222,12 @@ def deposit_address(exchange,currency):
             add = cexAPI.get_deposit_addresses(currency)
             print(add)
         except Exception as err:
-           eprint('Error: ' + str(err))
+            eprint('Error: ' + str(err))
         else:
-           add = json.dumps(add)
-           add = json.loads(add)
-           add = add['data']
-           return add
+            add = json.dumps(add)
+            add = json.loads(add)
+            add = add['data']
+            return add
 
     def binance_address(currency):
         binanceApi = Client(config.binanceKey, config.binanceSecret)
@@ -220,14 +236,13 @@ def deposit_address(exchange,currency):
             print(add)
         except Exception as err:
             logging.error(err)
-            eprint("Error getting deposit address: "+ str(err))
+            eprint("Error getting deposit address: " + str(err))
             return False
         else:
             add_ = json.dumps(add)
             return add_
-    
 
-    if exchange ==  'poloniex':
+    if exchange == 'poloniex':
         ret = poloniex_address(currency)
     if exchange == 'bittrex':
         ret = bittrex_address(currency)
@@ -236,4 +251,3 @@ def deposit_address(exchange,currency):
     if exchange == 'binance':
         ret = binance_address(currency)
     return(ret)
-

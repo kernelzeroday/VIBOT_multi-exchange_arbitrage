@@ -9,13 +9,16 @@ import config
 topic = "bbal2"
 client = mqtt.Client(topic + "client", clean_session=False)
 client.username_pw_set(config.mq_user, config.mq_pass)
-client.connect(config.mq_host, port=config.mq_port,
-               keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+client.connect(
+    config.mq_host,
+    port=config.mq_port,
+    keepalive=config.mq_keepalive,
+    bind_address=config.mq_bindAddress)
 client.loop_start()
 
 bit = BittrexAPI.bittrex(config.bittrexKey, config.bittrexSecret)
 
-while 1:
+while True:
     result = {}
     bprice = {}
     try:
@@ -34,7 +37,8 @@ while 1:
                 available = val.get("Available", 0.0)
                 balance = val.get("Balance", 0.0)
                 pending = val.get("Pending", 0.0) + balance - available
-                value = balance if key == "BTC" else bprice.get(key, 0.0) * balance
+                value = balance if key == "BTC" else bprice.get(
+                    key, 0.0) * balance
                 result[key] = {
                     "available": available,
                     "pending": pending,
@@ -46,5 +50,3 @@ while 1:
         print("ERROR", err)
         pass
     time.sleep(config.interval)
-
-

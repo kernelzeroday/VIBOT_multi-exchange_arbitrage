@@ -3,6 +3,7 @@ import json
 from decimal import Decimal
 from config import PID_FILE
 
+
 def get_config():
     with open(os.getcwd() + '/arb_config.json', 'r') as config_file:
         return json.loads(config_file.read())
@@ -20,8 +21,8 @@ def params_to_flags(params):
             raise Exception('Unexpected params: %s' % params)
         if key == "pairs":
             value = list_to_string(value)
-        #todo: add any custom flag handle here
-        result+="".join([" ", "-", key, " ", "'", value, "'"])
+        # todo: add any custom flag handle here
+        result += "".join([" ", "-", key, " ", "'", value, "'"])
     return result
 
 
@@ -38,8 +39,9 @@ def set_pids(engine, pids):
         with open(PID_FILE, 'wb') as data_file:
             data_file.write(json.dumps(config))
     except Exception as e:
-        raise Exception(('Unsuccess update of pids file %s: for updade engine: %s, pids: %s. Error: %s' % (PID_FILE, engine, pids, str(e))))
-
+        raise Exception(
+            ('Unsuccess update of pids file %s: for updade engine: %s, pids: %s. Error: %s' %
+             (PID_FILE, engine, pids, str(e))))
 
 
 class DecimalEncoder(json.JSONEncoder):
@@ -47,4 +49,3 @@ class DecimalEncoder(json.JSONEncoder):
         if isinstance(o, Decimal):
             return str(o)
         return super(DecimalEncoder, self).default(o)
-

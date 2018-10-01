@@ -4,9 +4,10 @@
 import poloniex
 import json
 import sys
-import time,datetime
+import time
+import datetime
 import config
-debug=True
+debug = True
 key = config.poloniexKey
 secret = config.poloniexSecret
 
@@ -17,11 +18,13 @@ from base64 import b64encode, b64decode
 from json import dumps, loads, JSONEncoder
 import pickle
 
+
 class PythonObjectEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
             return super().default(obj)
         return {'_python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
+
 
 def as_python_object(dct):
     if '_python_object' in dct:
@@ -30,14 +33,21 @@ def as_python_object(dct):
 
 
 import logging
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, filename='pololib.log')
+logging.basicConfig(
+    format='%(levelname)s:%(message)s',
+    level=logging.DEBUG,
+    filename='pololib.log')
+
 
 def eprint(data):
     print(data)
 
+
 def tS():
     return time.time()
-data = poloniex.Poloniex(key,secret)
+
+
+data = poloniex.Poloniex(key, secret)
 logging.debug("Program started at %s" % tS)
 
 
@@ -45,13 +55,14 @@ def ticker(pair):
     ticker = data.returnTicker()
     # this fixes json!
     ret = json.dumps(ticker[pair])
-    logging.info("Ticker call: "+ret)
+    logging.info("Ticker call: " + ret)
     print(ret)
 
 
-def move_order(order_id,pair,price,amount):
-    
-    if order_id == 'null' or pair == 'null' or float(price) <= float('0.0') or float(amount) <= float('0.0'):
+def move_order(order_id, pair, price, amount):
+
+    if order_id == 'null' or pair == 'null' or float(
+            price) <= float('0.0') or float(amount) <= float('0.0'):
         print("Specifiy an order id <-> , price <-P> , pair <-> , and amount <-a>")
         (1)
     else:
@@ -65,63 +76,70 @@ def move_order(order_id,pair,price,amount):
             ret = json.dumps(ret)
             logging.info(ret)
             print(ret)
-            
-            
+
+
 def all_balance():
     bals = data.returnCompleteBalances('all')
     bret = json.dumps(bals)
-    logging.info("All balances call : "+str(bret))
+    logging.info("All balances call : " + str(bret))
     print(bret)
-    
+
+
 def balances():
     bal = data.returnCompleteBalances('all')
     ret = json.dumps(bal)
-    logging.info("Balance call: "+ret)
+    logging.info("Balance call: " + ret)
     return(ret)
-    
+
+
 def hist(pair):
     if not pair:
         history = data.returnTradeHistory()
         logging.info("History call. Not logging that much data.")
         for i in history:
-             print("%s\n" % i)
+            print("%s\n" % i)
     else:
         history = data.returnTradeHistory(pair)
         logging.info("History call. Not logging that much data.")
         for i in history:
             print("%s\n" % i)
 
-def genadd(currency):            
+
+def genadd(currency):
     ret = data.generateNewAddress(currency)
     ret = json.dumps(ret)
-    logging.info("Generate Deposit address called: "+ret)
+    logging.info("Generate Deposit address called: " + ret)
     print(ret)
 
-def buy(pair,amount,price):
+
+def buy(pair, amount, price):
     if pair != 'null':
         if float(price) > 0.0:
             if float(amount) > 0.0:
                 try:
-                  ret = data.buy(pair, price, amount)
-                  amount = str(amount)
-                  price = str(price)
-                  logging.info("Buy order call: %s %s at %s " % (amount,pair,price))
+                    ret = data.buy(pair, price, amount)
+                    amount = str(amount)
+                    price = str(price)
+                    logging.info(
+                        "Buy order call: %s %s at %s " %
+                        (amount, pair, price))
                 except Exception as err:
                     print(err)
                     logging.info(err)
                     return False
                 else:
-                  if debug: print(ret)
-                  #ret = json.dumps(ret)
-                  #ret_ = str(ret)
-                  logging.debug("Buy order call: "+str(ret))
-                  #pret = json.loads(ret)
-                  _pret = json.dumps(ret,cls=PythonObjectEncoder)
-                  pret_ = json.loads(_pret,object_hook=as_python_object)
-                  order_id = pret_['orderNumber']
-                  order_id = str(order_id)
-                  print(ret)
-                  return order_id
+                    if debug:
+                        print(ret)
+                    #ret = json.dumps(ret)
+                    #ret_ = str(ret)
+                    logging.debug("Buy order call: " + str(ret))
+                    #pret = json.loads(ret)
+                    _pret = json.dumps(ret, cls=PythonObjectEncoder)
+                    pret_ = json.loads(_pret, object_hook=as_python_object)
+                    order_id = pret_['orderNumber']
+                    order_id = str(order_id)
+                    print(ret)
+                    return order_id
             else:
                 print(buysell_err)
                 return False
@@ -134,8 +152,7 @@ def buy(pair,amount,price):
         return False
 
 
-
-def sell(pair,amount,price):
+def sell(pair, amount, price):
     if pair != 'null':
         if float(price) > 0.0:
             if float(amount) > 0.0:
@@ -146,17 +163,20 @@ def sell(pair,amount,price):
                     logging.info(err)
                     return False
                 else:
-                  #ret = json.dumps(ret)
-                  _pret = json.dumps(ret,cls=PythonObjectEncoder)
-                  pret_ = json.loads(_pret,object_hook=as_python_object)
-                  order_id = pret_['orderNumber']
-                  if debug: print(ret)
-                  #ret_ = str(ret)
-                  price = str(price)
-                  amount = str(amount)
-                  logging.info("Sell order call: %s %s at %s " % (amount,pair,price))
-                  print(ret)
-                  return order_id
+                    #ret = json.dumps(ret)
+                    _pret = json.dumps(ret, cls=PythonObjectEncoder)
+                    pret_ = json.loads(_pret, object_hook=as_python_object)
+                    order_id = pret_['orderNumber']
+                    if debug:
+                        print(ret)
+                    #ret_ = str(ret)
+                    price = str(price)
+                    amount = str(amount)
+                    logging.info(
+                        "Sell order call: %s %s at %s " %
+                        (amount, pair, price))
+                    print(ret)
+                    return order_id
             else:
                 print(buysell_err)
                 return False
@@ -176,8 +196,9 @@ def orders():
         return False
     else:
         ret = json.dumps(ret)
-        logging.info("Open orders call: " +ret)
+        logging.info("Open orders call: " + ret)
         print(ret)
+
 
 def cancel_order(order_id):
     if order_id != 'null':
@@ -188,11 +209,13 @@ def cancel_order(order_id):
             return False
         else:
             ret = json.dumps(ret)
-            logging.info("Cancel order call: "+ret)
+            logging.info("Cancel order call: " + ret)
             print(ret)
     else:
         eprint("Please specify order id with -i <order id>")
         return False
+
+
 def deposit_addresses():
     logging.info('Get deposit address call')
     try:
@@ -203,17 +226,22 @@ def deposit_addresses():
         ret = json.dumps(ret)
         print(ret)
 
+
 def deposit_history():
-    timeNow = int(createTimeStamp('{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())))
+    timeNow = int(createTimeStamp(
+        '{:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())))
     span = int(timeNow) - int(since)
     try:
-        ret = json.dumps(data.returnDepositsWithdrawals(start=False,end=False))
+        ret = json.dumps(
+            data.returnDepositsWithdrawals(
+                start=False, end=False))
     except Exception as err:
         logger.info(err)
         print(err)
     else:
         #ret = json.dumps(ret)
         print(ret)
+
 
 def getfee():
     logging.info('Fee info call initatiated')
@@ -225,12 +253,15 @@ def getfee():
     else:
         ret = json.dumps(ret)
         print(ret)
+
+
 def information():
     ret = data.returnCurrencies()
     ret = json.dumps(ret)
     print(ret)
-    
-def withdraw(currency,amount,address,payment_id=None):
+
+
+def withdraw(currency, amount, address, payment_id=None):
     logging.info('Withdrawal call initiated')
     if not currency:
         return False
@@ -240,9 +271,9 @@ def withdraw(currency,amount,address,payment_id=None):
         return False
     print('WARNING: Please double check all required info for withdrawal!')
     if payment_id:
-       print('INFO: Payment id %s specified' % payment_id)
+        print('INFO: Payment id %s specified' % payment_id)
 
-    print('Currency:' +str(currency))
+    print('Currency:' + str(currency))
     print('Amount :' + str(amount))
     print('Address: ' + str(address))
 
@@ -254,8 +285,8 @@ def withdraw(currency,amount,address,payment_id=None):
             print('Canceling.')
             return False
     except Exception as err:
-         logger.info(err)
-         return False
+        logger.info(err)
+        return False
     else:
         if do_wd:
             try:
@@ -266,4 +297,4 @@ def withdraw(currency,amount,address,payment_id=None):
                 ts = timeStamp()
                 wd_ret = json.dumps(ret)
                 print(wd_ret)
-                logging.info('INFO:'  + str(ts) + ' Withdrawal: ' + str(wd_ret))
+                logging.info('INFO:' + str(ts) + ' Withdrawal: ' + str(wd_ret))

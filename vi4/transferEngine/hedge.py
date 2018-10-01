@@ -33,19 +33,17 @@ EXCHANGES = {}
 VOLUME = Decimal()
 
 
-def mqPublish(msg,topic='hedge'):
+def mqPublish(msg, topic='hedge'):
     client = mqtt.Client(client_id="hedgebot", clean_session=False)
     client = mqtt.Client('vihedger')
     client.username_pw_set(username='vibot', password='NmQ5Nj_3MrAwiNDu')
-    client.connect("localhost",1883,60)
+    client.connect("localhost", 1883, 60)
     try:
-        client.publish(topic, str(msg));
+        client.publish(topic, str(msg))
     except Exception as err:
         print(err)
     finally:
-        client.disconnect();
-
-
+        client.disconnect()
 
 
 class Exchange:
@@ -83,21 +81,22 @@ class Exchange:
 class Bittrex(Exchange):
     def __init__(self, name):
         pairs = {
-            "BTC_XRP":  {"name": "BTC-XRP"},
-            "BTC_ETH":  {"name": "BTC-ETH"},
+            "BTC_XRP": {"name": "BTC-XRP"},
+            "BTC_ETH": {"name": "BTC-ETH"},
             "BTC_DASH": {"name": "BTC-DASH"},
-            "BTC_ZEC":  {"name": "BTC-ZEC"},
-            "BTC_XLM":  {"name": "BTC-XLM"},
-            "BTC_LTC":  {"name": "BTC-LTC"},
-            "BTC_LSK":  {"name": "BTC-LSK"},
-            "BTC_ETC":  {"name": "BTC-ETC"},
-            "BTC_XMR":  {"name": "BTC-XMR"},
+            "BTC_ZEC": {"name": "BTC-ZEC"},
+            "BTC_XLM": {"name": "BTC-XLM"},
+            "BTC_LTC": {"name": "BTC-LTC"},
+            "BTC_LSK": {"name": "BTC-LSK"},
+            "BTC_ETC": {"name": "BTC-ETC"},
+            "BTC_XMR": {"name": "BTC-XMR"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
 
         # Get market volumes
-        resp = getJSON("https://bittrex.com/api/v1.1/public/getmarketsummaries")
+        resp = getJSON(
+            "https://bittrex.com/api/v1.1/public/getmarketsummaries")
         summary = resp.get("result", False)
         if summary:
             for entry in summary:
@@ -109,17 +108,21 @@ class Bittrex(Exchange):
                     pairs[pair]["volume"] = vol
                     volumeTotal += vol
 
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
 
 class Cex(Exchange):
     def __init__(self, name):
         pairs = {
-            "BTC_XRP":  {"name": "XRP/BTC"},
-            "BTC_ETH":  {"name": "ETH/BTC"},
+            "BTC_XRP": {"name": "XRP/BTC"},
+            "BTC_ETH": {"name": "ETH/BTC"},
             "BTC_DASH": {"name": "DASH/BTC"},
-            "BTC_ZEC":  {"name": "ZEC/BTC"},
-            "BTC_XLM":  {"name": "XLM/BTC"},
+            "BTC_ZEC": {"name": "ZEC/BTC"},
+            "BTC_XLM": {"name": "XLM/BTC"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
@@ -140,20 +143,24 @@ class Cex(Exchange):
                     pairs[pair]["volume"] = vol
                     volumeTotal += vol
 
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
 
 
 class Poloniex(Exchange):
     def __init__(self, name):
         pairs = {
-            "BTC_XRP":  {"name": "BTC_XRP"},
-            "BTC_ETH":  {"name": "BTC_ETH"},
+            "BTC_XRP": {"name": "BTC_XRP"},
+            "BTC_ETH": {"name": "BTC_ETH"},
             "BTC_DASH": {"name": "BTC_DASH"},
-            "BTC_ZEC":  {"name": "BTC_ZEC"},
-            "BTC_XLM":  {"name": "BTC_STR"},
-            "BTC_LTC":  {"name": "BTC_LTC"},
-            "BTC_LSK":  {"name": "BTC_LSK"},
-            "BTC_ETC":  {"name": "BTC_ETC"},
+            "BTC_ZEC": {"name": "BTC_ZEC"},
+            "BTC_XLM": {"name": "BTC_STR"},
+            "BTC_LTC": {"name": "BTC_LTC"},
+            "BTC_LSK": {"name": "BTC_LSK"},
+            "BTC_ETC": {"name": "BTC_ETC"},
         }
         inversePairs = {v["name"]: k for k, v in pairs.items()}
         volumeTotal = Decimal()
@@ -169,7 +176,12 @@ class Poloniex(Exchange):
             )
             pairs[k]["volume"] = vol
             volumeTotal += vol
-        super().__init__(name, pairs=pairs, inversePairs=inversePairs, volumeTotal=volumeTotal)
+        super().__init__(
+            name,
+            pairs=pairs,
+            inversePairs=inversePairs,
+            volumeTotal=volumeTotal)
+
 
 """
 def printHedge():
@@ -182,24 +194,32 @@ def printHedge():
             ExName, Ex.volumeTotal, (Ex.volumeTotal * Decimal('100') / VOLUME).quantize(Decimal('0.01'), rounding=ROUND_DOWN)))
 """
 
+
 def pubHedge():
     global VOLUME
     global EXCHANGES
     for ExName, Ex in EXCHANGES.items():
         for PairName, Pair in Ex.pairs.items():
             #print("%s\t- %s\t%s %%" % (ExName, PairName, Pair["hedgeRatio"]))
-            message=('{"exchange" : "%s", "pair" : "%s", "ratio" : "%s"}' % (ExName, PairName, Pair["hedgeRatio"]))
-            mqPublish(message,'hedge')
+            message = (
+                '{"exchange" : "%s", "pair" : "%s", "ratio" : "%s"}' %
+                (ExName, PairName, Pair["hedgeRatio"]))
+            mqPublish(message, 'hedge')
             print(message)
-        print("%s\t- TOTAL BTC:\t%s (%s %%)" % (
-            ExName, Ex.volumeTotal, (Ex.volumeTotal * Decimal('100') / VOLUME).quantize(Decimal('0.01'), rounding=ROUND_DOWN)))
-
+        print(
+            "%s\t- TOTAL BTC:\t%s (%s %%)" %
+            (ExName,
+             Ex.volumeTotal,
+             (Ex.volumeTotal *
+              Decimal('100') /
+              VOLUME).quantize(
+                 Decimal('0.01'),
+                 rounding=ROUND_DOWN)))
 
 
 bit = Bittrex("BTRX")
 cex = Cex("CEX")
 pol = Poloniex("POLX")
 
-#printHedge()
+# printHedge()
 pubHedge()
-

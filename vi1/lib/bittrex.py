@@ -13,15 +13,36 @@ except ImportError:
     from urllib2 import urlopen, Request
     from urllib import urlencode
 
+
 class bittrex(object):
 
     def __init__(self, key, secret):
         self.key = key
         self.secret = secret
-        self.public = ['getmarkets', 'getcurrencies', 'getticker', 'getmarketsummaries', 'getmarketsummary', 'getorderbook', 'getmarkethistory']
-        self.market = ['buylimit', 'buymarket', 'selllimit', 'sellmarket', 'cancel', 'getopenorders']
-        self.account = ['getbalances', 'getbalance', 'getdepositaddress', 'withdraw', 'getorder', 'getorderhistory', 'getwithdrawalhistory', 'getdeposithistory']
-
+        self.public = [
+            'getmarkets',
+            'getcurrencies',
+            'getticker',
+            'getmarketsummaries',
+            'getmarketsummary',
+            'getorderbook',
+            'getmarkethistory']
+        self.market = [
+            'buylimit',
+            'buymarket',
+            'selllimit',
+            'sellmarket',
+            'cancel',
+            'getopenorders']
+        self.account = [
+            'getbalances',
+            'getbalance',
+            'getdepositaddress',
+            'withdraw',
+            'getorder',
+            'getorderhistory',
+            'getwithdrawalhistory',
+            'getdeposithistory']
 
     def query(self, method, values={}):
         if method in self.public:
@@ -38,9 +59,12 @@ class bittrex(object):
         if method not in self.public:
             url += '&apikey=' + self.key
             url += '&nonce=' + str(int(time.time()))
-            #hashlib.sha256(str(random.getrandbits(256)).encode('utf-8')).hexdigest()
+            # hashlib.sha256(str(random.getrandbits(256)).encode('utf-8')).hexdigest()
             #url += urllib.parse.urlencode(options)
-            signature = hmac.new(self.secret.encode('utf-8'), url.encode('utf-8'), hashlib.sha512).hexdigest()
+            signature = hmac.new(
+                self.secret.encode('utf-8'),
+                url.encode('utf-8'),
+                hashlib.sha512).hexdigest()
             #signature = hmac.new('self.secret', url, hashlib.sha512).hexdigest()
             headers = {'apisign': signature}
         else:
@@ -53,7 +77,6 @@ class bittrex(object):
             return response["result"]
         else:
             return response["message"]
-
 
     def getmarkets(self):
         return self.query('getmarkets')
@@ -71,22 +94,34 @@ class bittrex(object):
         return self.query('getmarketsummary', {'market': market})
 
     def getorderbook(self, market, type, depth=20):
-        return self.query('getorderbook', {'market': market, 'type': type, 'depth': depth})
+        return self.query(
+            'getorderbook', {
+                'market': market, 'type': type, 'depth': depth})
 
     def getmarkethistory(self, market, count=20):
-        return self.query('getmarkethistory', {'market': market, 'count': count})
+        return self.query(
+            'getmarkethistory', {
+                'market': market, 'count': count})
 
     def buylimit(self, market, quantity, rate):
-        return self.query('buylimit', {'market': market, 'quantity': quantity, 'rate': rate})
+        return self.query(
+            'buylimit', {
+                'market': market, 'quantity': quantity, 'rate': rate})
 
     def buymarket(self, market, quantity):
-        return self.query('buymarket', {'market': market, 'quantity': quantity})
+        return self.query(
+            'buymarket', {
+                'market': market, 'quantity': quantity})
 
     def selllimit(self, market, quantity, rate):
-        return self.query('selllimit', {'market': market, 'quantity': quantity, 'rate': rate})
+        return self.query(
+            'selllimit', {
+                'market': market, 'quantity': quantity, 'rate': rate})
 
     def sellmarket(self, market, quantity):
-        return self.query('sellmarket', {'market': market, 'quantity': quantity})
+        return self.query(
+            'sellmarket', {
+                'market': market, 'quantity': quantity})
 
     def cancel(self, uuid):
         return self.query('cancel', {'uuid': uuid})
@@ -104,17 +139,24 @@ class bittrex(object):
         return self.query('getdepositaddress', {'currency': currency})
 
     def withdraw(self, currency, quantity, address):
-        return self.query('withdraw', {'currency': currency, 'quantity': quantity, 'address': address})
+        return self.query(
+            'withdraw', {
+                'currency': currency, 'quantity': quantity, 'address': address})
 
     def getorder(self, uuid):
         return self.query('getorder', {'uuid': uuid})
 
     def getorderhistory(self, market, count):
-        return self.query('getorderhistory', {'market': market, 'count': count})
+        return self.query(
+            'getorderhistory', {
+                'market': market, 'count': count})
 
     def getwithdrawalhistory(self, currency, count):
-        return self.query('getwithdrawalhistory', {'currency': currency, 'count': count})
+        return self.query(
+            'getwithdrawalhistory', {
+                'currency': currency, 'count': count})
 
     def getdeposithistory(self, currency, count):
-        return self.query('getdeposithistory', {'currency': currency, 'count': count})
-
+        return self.query(
+            'getdeposithistory', {
+                'currency': currency, 'count': count})

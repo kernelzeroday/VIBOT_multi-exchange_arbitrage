@@ -9,10 +9,10 @@ bittrexSecret = 'e2f700b383b54058800f769b0d96e9ec'
 binanceKey = 'vURW3wM0yC7vD4RwAZIEFbMsDND5SIXIj0lGWhcv4RlNVlXtk0EVV3bSq9xrC8Jh'
 binanceSecret = 'r0XkzQBMC6xHXTz7IE9DF9yHmwqWBsuul3lJlX6TfT8YCqqYViItBSdtEkBdZ539'
 
-mq_remote_host='vi1.vibot.sh'
-mq_host='mqirc.anondns.net'
-mq_port=1883
-mq_user='vibot'
-mq_pass='NmQ5Nj_3MrAwiNDu'
-mq_subtop='transfers/incoming'
-mq_pubtop='messages'
+mq_remote_host = 'vi1.vibot.sh'
+mq_host = 'mqirc.anondns.net'
+mq_port = 1883
+mq_user = 'vibot'
+mq_pass = 'NmQ5Nj_3MrAwiNDu'
+mq_subtop = 'transfers/incoming'
+mq_pubtop = 'messages'

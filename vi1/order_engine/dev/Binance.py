@@ -7,15 +7,19 @@ from sys import exit
 from binance.client import Client
 
 # Log Formatter
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, filename='tool.log')
+logging.basicConfig(
+    format='%(levelname)s:%(message)s',
+    level=logging.DEBUG,
+    filename='tool.log')
+
 
 class Binance(object):
     def __init__(self, k, s):
         self.api = Client(k, s)
-        
+
     def eprint(*args, **kwargs):
         print(*args, file=sys.stderr, **kwargs)
-    
+
     def get_ticker(self, pair):
         pair = str(pair)
         if pair == 'null':
@@ -25,7 +29,7 @@ class Binance(object):
             t = self.api.get_recent_trades(symbol=pair)
         except Exception as err:
             logging.error(err)
-            self.eprint('Error getting ticker data: '+str(err))
+            self.eprint('Error getting ticker data: ' + str(err))
             return False
         else:
             tt = json.dumps(t)
@@ -35,8 +39,8 @@ class Binance(object):
                 return(tt)
             except Exception as err:
                 self.eprint(err)
-                #return(tt)
-    
+                # return(tt)
+
     def get_deposit_address(self, currency):
         if currency == 'null':
             self.eprint('WARN: No currency specified, defaulting to BTC')
@@ -45,12 +49,12 @@ class Binance(object):
             add = self.api.get_deposit_address(asset=currency)
         except Exception as err:
             logging.error(err)
-            self.eprint("Error getting deposit address: "+ str(err))
+            self.eprint("Error getting deposit address: " + str(err))
             return False
         else:
             add_ = json.dumps(add)
             return add_
-    
+
     def get_balances(self):
         try:
             bals = self.api.get_account()['balances']
@@ -61,7 +65,7 @@ class Binance(object):
         else:
             bals = json.dumps(bals)
             return bals
-    
+
     def get_balance(self, currency):
         if currency == 'null':
             self.eprint('WARN: No currency specified, defaulting to BTC')
@@ -84,7 +88,7 @@ class Binance(object):
             ret = self.api.get_order_book(symbol=pair)
         except Exception as err:
             self.eprint("Error getting orderbook")
-            logging.info("Error getting orderbook: "+ str(err))
+            logging.info("Error getting orderbook: " + str(err))
         else:
             ret = json.dumps(ret)
             return ret
@@ -100,10 +104,11 @@ class Binance(object):
             self.eprint('Specify a price with -P')
             return False
         try:
-            ret = self.api.order_market_buy(symbol=pair, quantity=amount, price=price)
+            ret = self.api.order_market_buy(
+                symbol=pair, quantity=amount, price=price)
         except Exception as err:
             logging.info(err)
-            self.eprint('Error placing buy limit order: '+ str(err))
+            self.eprint('Error placing buy limit order: ' + str(err))
             return False
         else:
             ret = json.dumps(ret)
@@ -120,10 +125,11 @@ class Binance(object):
             self.eprint('Specify a price with -P')
             return False
         try:
-            ret = self.api.order_market_sell(symbol=pair, quantity=amount, price=price)
+            ret = self.api.order_market_sell(
+                symbol=pair, quantity=amount, price=price)
         except Exception as err:
             logging.info(err)
-            self.eprint('Error placing sell limit order: '+ str(err))
+            self.eprint('Error placing sell limit order: ' + str(err))
             return False
         else:
             ret = json.dumps(ret)
@@ -137,7 +143,7 @@ class Binance(object):
             self.eprint('Specify an amount with -a')
             return False
         try:
-            ret = self.api.order_market_buy(symbol=pair,quantity=amount)
+            ret = self.api.order_market_buy(symbol=pair, quantity=amount)
         except Exception as err:
             self.eprint(err)
             logging.info(err)
@@ -149,7 +155,6 @@ class Binance(object):
             else:
                 return(ret)
 
-
     def sell_market_order(self, pair, amount):
         if pair == 'null':
             self.eprint('Specify a pair with -p')
@@ -158,7 +163,7 @@ class Binance(object):
             self.eprint('Specify an amount with -a')
             return False
         try:
-            ret = self.api.order_market_sell(symbol=pair,quantity=amount)
+            ret = self.api.order_market_sell(symbol=pair, quantity=amount)
         except Exception as err:
             self.eprint(err)
             logging.info(err)
@@ -178,7 +183,7 @@ class Binance(object):
             ret = self.api.cancel_order(orderId=order_id, symbol=pair)
         except Exception as err:
             logging.info(err)
-            self.eprint('Error canceling order: '+ str(err))
+            self.eprint('Error canceling order: ' + str(err))
             return False
         else:
             ret = json.dumps(ret)
@@ -195,13 +200,14 @@ class Binance(object):
             self.eprint('Specify an address with -A !')
             return False
         print('Please review the following information carefully!')
-        print('Currency: ' +str(currency))
+        print('Currency: ' + str(currency))
         print('Address: ' + str(address))
         print('Amount: ' + str(amount))
         do_it = input("Proceed? (YES/NO) :")
         if do_it == 'YES':
             try:
-                ret = self.api.withdraw(asset=currency, address=address, amount=amount)
+                ret = self.api.withdraw(
+                    asset=currency, address=address, amount=amount)
             except Exception as err:
                 logging.error(err)
                 self.eprint('Error withdrawing currency: ' + str(err))
@@ -216,7 +222,7 @@ class Binance(object):
 
     def wd_history(self, currency, count=10):
         if currency == 'null':
-        #self.eprint('No currency specified, defaulting to BTC')
+            #self.eprint('No currency specified, defaulting to BTC')
             currency = ''
         try:
             ret = self.api.get_withdraw_history(asset=currency)
@@ -226,10 +232,10 @@ class Binance(object):
         else:
             ret = json.dumps(ret)
             return(ret)
-    
+
     def get_orders(self, pair):
         if pair == 'null':
-            pair=''
+            pair = ''
         try:
             ret = self.api.get_open_orders(symbol=pair)
         except Exception as err:
@@ -244,27 +250,28 @@ class Binance(object):
             ret = self.api.getcurrencies()
         except Exception as err:
             logging.info(err)
-            self.eprint('Error getting currency data'+ str(err))
+            self.eprint('Error getting currency data' + str(err))
         else:
             ret = json.dumps(ret)
             print(ret)
 
     def deposithistory(self, currency, count=10):
         if currency == 'null':
-            currency=''
+            currency = ''
         try:
             ret = self.api.get_deposit_history(asset=currency)
         except Exception as err:
             logging.info(err)
-            self.eprint('Error getting deposit history' +str(err))
+            self.eprint('Error getting deposit history' + str(err))
         else:
             ret = json.dumps(ret)
             print(ret)
 
     def orderHist(self, pair, count=10):
-        if pair == 'null' : pair=''
+        if pair == 'null':
+            pair = ''
         try:
-            ret = self.api.get_all_orders(symbol=pair,limit=count)
+            ret = self.api.get_all_orders(symbol=pair, limit=count)
         except Exception as err:
             logging.info(err)
         else:

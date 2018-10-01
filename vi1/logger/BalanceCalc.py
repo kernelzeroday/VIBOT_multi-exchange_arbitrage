@@ -5,7 +5,7 @@ import time
 import paho.mqtt.client as mqtt
 import config
 import requests
-import datetime	
+import datetime
 
 #CURRENCIES = ["BTC", "XRP", "ETH", "DASH", "ZEC", "XLM", "STR", "LTC", "ETC", "XMR", "LSK", "GNT", "OMG", "XEM", "ZRX", "SC", "REP", "CVC", "FCT"]
 CURRENCIES = ["BTC", "XRP", "ETH", "DASH", "ZEC", "XLM", "STR", "XMR"]
@@ -25,31 +25,33 @@ from base64 import b64encode, b64decode
 from json import dumps, loads, JSONEncoder
 import pickle
 
+
 class PythonObjectEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
             return super().default(obj)
         return {'_python_object': b64encode(pickle.dumps(obj)).decode('utf-8')}
 
+
 def as_python_object(dct):
     if '_python_object' in dct:
         return pickle.loads(b64decode(dct['_python_object'].encode('utf-8')))
     return dct
 
-def mqpub(msg,topic='messages'):
+
+def mqpub(msg, topic='messages'):
     client = mqtt.Client(client_id="publish_test", clean_session=False)
     client = mqtt.Client('tester')
     client.username_pw_set(username='vibot', password='NmQ5Nj_3MrAwiNDu')
-    client.connect("localhost",1883,60)
-    client.publish(topic, str(msg));
-    client.disconnect();
+    client.connect("localhost", 1883, 60)
+    client.publish(topic, str(msg))
+    client.disconnect()
 
 
-
-def lprint(data,topic='messages'):
+def lprint(data, topic='messages'):
     global log_filename
 
-    mqpub(data,topic)
+    mqpub(data, topic)
 #    print(data)
     current_date_str = str(datetime.datetime.now().date())
 
@@ -57,7 +59,7 @@ def lprint(data,topic='messages'):
         log_filename = current_date_str
 
     with open('/var/www/html/' + log_filename + '.log', 'a') as f:
-        f.write(data+"\n") 
+        f.write(data + "\n")
 
 
 def mqParse(client, userdata, message):
@@ -76,18 +78,22 @@ def mqParse(client, userdata, message):
         elif message.topic == "pbal2":
             POLONIEX = res
 
+
 client = mqtt.Client("calc", clean_session=False)
 client.username_pw_set(config.mq_user, config.mq_pass)
 # Event Handlers
 client.on_message = mqParse
 # Connect to Broker
-client.connect(config.mq_host, port=config.mq_port,
-               keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+client.connect(
+    config.mq_host,
+    port=config.mq_port,
+    keepalive=config.mq_keepalive,
+    bind_address=config.mq_bindAddress)
 # Subscribe to Topics
 client.subscribe(SUBSCRIPTIONS)
 client.loop_start()
 
-while 1:
+while True:
     current_datetime = datetime.datetime.now()
     lprint(str(current_datetime)[:19] + ' UTC')
     lprint("BITTREX")
@@ -95,24 +101,25 @@ while 1:
     for key, val in BITTREX.items():
         if key in CURRENCIES:
             bTotal += val.get("value", 0)
-            lprint(str(key)+ " "+str(val))
+            lprint(str(key) + " " + str(val))
         if key in 'USDT':
             val = val['available']
-            value = requests.get('https://bittrex.com/api/v1.1/public/getticker?market=USDT-BTC')
+            value = requests.get(
+                'https://bittrex.com/api/v1.1/public/getticker?market=USDT-BTC')
             value = value.content
             #value = json.dumps(value,cls=PythonObjectEncoder)
-            value = json.loads(value,object_hook=as_python_object)
+            value = json.loads(value, object_hook=as_python_object)
             if usdt:
                 print(value)
             try:
                 value = value['result']['Ask']
                 value = float(value)
-            except:
+            except BaseException:
                 pass
             print(val / value)
             try:
                 bTotal += (float((val) / float(value)))
-            except:
+            except BaseException:
                 pass
     lprint("BITTREX TOTAL: %f\n" % bTotal)
     mqpub("""{'bittrexTotal':'%f'}""" % (bTotal), 'totalBal')
@@ -130,7 +137,7 @@ while 1:
         if key in CURRENCIES:
             pTotal += val.get("value", 0)
             lprint(str(key) + " " + str(val))
-        #if key in 'USDT':
+        # if key in 'USDT':
         #    val = val['value']
         #    pTotal += val
             #value = requests.get('https://poloniex.com/public?command=returnTicker')
@@ -141,4 +148,3 @@ while 1:
     mqpub("""{'poloniexTotal':'%f'}""" % (pTotal), 'totalBal')
     lprint("TOTAL BTC: %f\n" % (cTotal + pTotal + bTotal))
     time.sleep(10)
-

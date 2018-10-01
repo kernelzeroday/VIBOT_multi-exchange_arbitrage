@@ -11,19 +11,21 @@ def get_fee_info():
     try:
         ret = json.dumps(api.get_myfee)
     except Exception as err:
-       print('Error: '+ str(err))
+        print('Error: ' + str(err))
     else:
-       print(ret)
+        print(ret)
+
 
 def get_deposit_addresses_(currency):
     api = cexio.Api(conf.username, conf.api_key, conf.api_secret)
     try:
         ret = api.get_deposit_addresses(currency)
     except Exception as err:
-       print('Error: ' + str(err))
+        print('Error: ' + str(err))
     else:
-       #ret = json.loads(ret)
-       print(ret)
+        #ret = json.loads(ret)
+        print(ret)
+
 
 def ticker(pair):
     try:
@@ -35,17 +37,19 @@ def ticker(pair):
         print("Error: %s" % err)
         return False
 
-def convert_price(amount,pair):
+
+def convert_price(amount, pair):
     api = cexio.Api(conf.username, conf.api_key, conf.api_secret)
     #amount = float(amount)
     #pair = str(pair)
     try:
-        ret = api.convert(amount,pair)
+        ret = api.convert(amount, pair)
     except Exception as err:
         print(err)
         return False
     else:
         return(ret)
+
 
 def balances():
     try:
@@ -56,12 +60,13 @@ def balances():
         except Exception as err:
             print(err)
             return False
-        #print(bal)
+        # print(bal)
         #bal = json.dumps(bal)
         return(bal)
     except Exception as err:
         print("Error: %s" % err)
         return False
+
 
 def orders(pair=''):
     try:
@@ -76,19 +81,21 @@ def orders(pair=''):
         orders = json.dumps(orders)
         return(orders)
 
+
 def orderBook(pair):
     try:
         api = cexio.Api(conf.username, conf.api_key, conf.api_secret)
         if pair == 'null':
             book = api.order_book('1', 'BTC/USD')
         else:
-            book = order_book = api.order_book('1',pair)
+            book = order_book = api.order_book('1', pair)
     except Exception as err:
         print(err)
     else:
         book = json.dumps(book)
         return(book)
-    
+
+
 def cancel(order_id):
     api = cexio.Api(conf.username, conf.api_key, conf.api_secret)
     try:
@@ -98,6 +105,7 @@ def cancel(order_id):
         return False
     else:
         return("Success")
+
 
 def price_stats(hours, limit, pair):
     api = cexio.Api(conf.username, conf.api_key, conf.api_secret)
@@ -109,17 +117,17 @@ def price_stats(hours, limit, pair):
             return False
         else:
             ret = json.loads(ret)
-            plist = []         
+            plist = []
             for i in ret:
                 price = str(i['price'])
                 timestamp = str(i['tmsp'])
-                plist.append("Price: "+price+" Time: "+timestamp)
+                plist.append("Price: " + price + " Time: " + timestamp)
             return list(plist)
 
-    
     else:
         print("Invalid Pair")
         return False
+
 
 def get_trade_hist(since, pair):
     """
@@ -138,8 +146,6 @@ def get_trade_hist(since, pair):
     else:
         print("Invalid pair specified")
         return False
-        
-
 
 
 def valid_pair(pair):
@@ -147,7 +153,7 @@ def valid_pair(pair):
         api = cexio.Api(conf.username, conf.api_key, conf.api_secret)
         last = json.dumps(api.ticker(pair)['last'])
     except Exception as err:
-        print("Valid pair: %s" %err)
+        print("Valid pair: %s" % err)
         return False
     else:
         return True
@@ -166,9 +172,9 @@ def buy(pair, amount, price):
             if float(price) and float(price) > float(0.0):
                 if valid_pair(pair):
                     try:
-                        
+
                         ret = api.buy_limit_order(amount, price, pair)
-                        
+
                         #ret = api.sell_limit_order(amount, price, pair)
                     except Exception as err:
                         print(err)
@@ -176,7 +182,8 @@ def buy(pair, amount, price):
                     else:
                         ret = json.dumps(ret)
                         order_info = json.loads(ret)
-                        if debug: print(ret)
+                        if debug:
+                            print(ret)
                         try:
                             order_type = order_info['type']
                             order_id = order_info['id']
@@ -189,8 +196,12 @@ def buy(pair, amount, price):
                             print(err)
                             return False
                         else:
-                            print("Sucess. Order ID: %s posted at %s  " % (order_id,order_time,))
-                            print("Type: %s Amount: %s at %s Complete: %s Pending: %s" %(order_type,order_amount,order_price,order_complete,order_pending))
+                            print(
+                                "Sucess. Order ID: %s posted at %s  " %
+                                (order_id, order_time,))
+                            print(
+                                "Type: %s Amount: %s at %s Complete: %s Pending: %s" %
+                                (order_type, order_amount, order_price, order_complete, order_pending))
                             return order_id
                 else:
                     print("Invalid pair, not executing")
@@ -201,6 +212,8 @@ def buy(pair, amount, price):
         else:
             print("Invalid amount, not executing")
             return False
+
+
 def sell(pair, amount, price):
     pair = str(pair)
     debug = True
@@ -214,9 +227,9 @@ def sell(pair, amount, price):
             if float(price) and float(price) > float(0.0):
                 if valid_pair(pair):
                     try:
-                        
+
                         #ret = api.buy_limit_order(amount, price, pair)
-                        
+
                         ret = api.sell_limit_order(amount, price, pair)
                     except Exception as err:
                         print(err)
@@ -224,7 +237,8 @@ def sell(pair, amount, price):
                     else:
                         ret = json.dumps(ret)
                         order_info = json.loads(ret)
-                        if debug: print(ret)
+                        if debug:
+                            print(ret)
                         try:
                             order_type = order_info['type']
                             order_id = order_info['id']
@@ -237,8 +251,12 @@ def sell(pair, amount, price):
                             print(err)
                             return False
                         else:
-                            print("Sucess. Order ID: %s posted at %s  " % (order_id,order_time,))
-                            print("Type: %s Amount: %s at %s Complete: %s Pending: %s" %(order_type,order_amount,order_price,order_complete,order_pending))
+                            print(
+                                "Sucess. Order ID: %s posted at %s  " %
+                                (order_id, order_time,))
+                            print(
+                                "Type: %s Amount: %s at %s Complete: %s Pending: %s" %
+                                (order_type, order_amount, order_price, order_complete, order_pending))
                             return order_id
                 else:
                     print("Invalid pair, not executing")
@@ -249,4 +267,3 @@ def sell(pair, amount, price):
         else:
             print("Invalid amount, not executing")
             return False
-

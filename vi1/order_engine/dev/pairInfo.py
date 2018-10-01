@@ -1,7 +1,28 @@
 #!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 from decimal import *
-PAIR_ARR = ["BTC_XRP", "BTC_ETH", "BTC_DASH", "BTC_ZEC", "BTC_XLM", "BTC_LTC", "BTC_ETC", "BTC_XMR", "BTC_OMG", "BTC_LSK", "BTC_XEM", "BTC_GNT", "ETH_ZEC", "ETH_ETC", "ETH_GNT", "ETH_OMG", "ETH_ZRX", "BTC_REP", "BTC_RDD", "BTC_SC", "BTC_ZRX"]
+PAIR_ARR = [
+    "BTC_XRP",
+    "BTC_ETH",
+    "BTC_DASH",
+    "BTC_ZEC",
+    "BTC_XLM",
+    "BTC_LTC",
+    "BTC_ETC",
+    "BTC_XMR",
+    "BTC_OMG",
+    "BTC_LSK",
+    "BTC_XEM",
+    "BTC_GNT",
+    "ETH_ZEC",
+    "ETH_ETC",
+    "ETH_GNT",
+    "ETH_OMG",
+    "ETH_ZRX",
+    "BTC_REP",
+    "BTC_RDD",
+    "BTC_SC",
+    "BTC_ZRX"]
 
 Okex = {
     "BTC_REP": {
@@ -13,7 +34,7 @@ Okex = {
         "minQty": Decimal('0.02'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
+    },
     "BTC_RDD": {
         "name": "BTC-RDD",
         "base": "BTC",
@@ -24,7 +45,7 @@ Okex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
 
-},
+    },
     "BTC_ZRX": {
         "name": "BTC-ZRX",
         "base": "BTC",
@@ -34,9 +55,9 @@ Okex = {
         "minQty": Decimal('50'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
+    },
 
-    "BTC_XRP":  {
+    "BTC_XRP": {
         "name": "BTC-XRP",
         "base": "BTC",
         "quote": "XRP",
@@ -46,7 +67,7 @@ Okex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "BTC_ETH":  {
+    "BTC_ETH": {
         "name": "BTC-ETH",
         "base": "BTC",
         "quote": "ETH",
@@ -66,7 +87,7 @@ Okex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "BTC_ZEC":  {
+    "BTC_ZEC": {
         "name": "BTC-ZEC",
         "base": "BTC",
         "quote": "ZEC",
@@ -76,7 +97,7 @@ Okex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.01'),
     },
-    "BTC_XLM":  {
+    "BTC_XLM": {
         "name": "BTC-XLM",
         "base": "BTC",
         "quote": "XLM",
@@ -146,9 +167,9 @@ Okex = {
         "minQty": Decimal('50'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
+    },
 
-    "ETH_ETC":  {
+    "ETH_ETC": {
         "name": "ETH-ETC",
         "base": "ETC",
         "quote": "ETC",
@@ -158,7 +179,7 @@ Okex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LTC":  {
+    "ETH_LTC": {
         "name": "ETH-LTC",
         "base": "ETC",
         "quote": "LTC",
@@ -168,7 +189,7 @@ Okex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_OMG":  {
+    "ETH_OMG": {
         "name": "ETH-OMG",
         "base": "ETC",
         "quote": "OMG",
@@ -178,7 +199,7 @@ Okex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.0001'),
     },
-    "ETH_GNT":  {
+    "ETH_GNT": {
         "name": "ETH-GNT",
         "base": "ETC",
         "quote": "GNT",
@@ -188,7 +209,7 @@ Okex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LSK":  {
+    "ETH_LSK": {
         "name": "ETH-LSK",
         "base": "ETH",
         "quote": "LSK",
@@ -198,7 +219,7 @@ Okex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "ETH_ZRX":  {
+    "ETH_ZRX": {
         "name": "ETH_ZRX",
         "base": "ETH",
         "quote": "ZRX",
@@ -207,8 +228,8 @@ Okex = {
         "minQty": Decimal('0.15'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
-    "BTC_OMG":  {
+    },
+    "BTC_OMG": {
         "name": "BTC-OMG",
         "base": "BTC",
         "quote": "OMG",
@@ -220,7 +241,7 @@ Okex = {
     },
 
 
-    "USD_BTC":  {
+    "USD_BTC": {
         "name": "USDT-BTC",
         "base": "USDT",
         "quote": "BTC",
@@ -230,7 +251,7 @@ Okex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ETH":  {
+    "USD_ETH": {
         "name": "USDT-ETH",
         "base": "USDT",
         "quote": "ETH",
@@ -240,7 +261,7 @@ Okex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ZEC":  {
+    "USD_ZEC": {
         "name": "USDT-ZEC",
         "base": "USDT",
         "quote": "ZEC",
@@ -250,7 +271,7 @@ Okex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_DASH":  {
+    "USD_DASH": {
         "name": "USDT-DASH",
         "base": "USDT",
         "quote": "DASH",
@@ -261,7 +282,7 @@ Okex = {
     },
 
 
-    "USD_LTC":  {
+    "USD_LTC": {
         "name": "USDT-LTC",
         "base": "USDT",
         "quote": "LTC",
@@ -271,7 +292,7 @@ Okex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_XMR":  {
+    "USD_XMR": {
         "name": "USDT-XMR",
         "base": "USDT",
         "quote": "XMR",
@@ -281,7 +302,7 @@ Okex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ETC":  {
+    "USD_ETC": {
         "name": "USDT-ETC",
         "base": "USDT",
         "quote": "ETC",
@@ -303,7 +324,7 @@ Bittrex = {
         "minQty": Decimal('0.02'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
+    },
     "BTC_RDD": {
         "name": "BTC-RDD",
         "base": "BTC",
@@ -314,7 +335,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
 
-},
+    },
     "BTC_ZRX": {
         "name": "BTC-ZRX",
         "base": "BTC",
@@ -324,9 +345,9 @@ Bittrex = {
         "minQty": Decimal('50'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
+    },
 
-    "BTC_XRP":  {
+    "BTC_XRP": {
         "name": "BTC-XRP",
         "base": "BTC",
         "quote": "XRP",
@@ -336,7 +357,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "BTC_ETH":  {
+    "BTC_ETH": {
         "name": "BTC-ETH",
         "base": "BTC",
         "quote": "ETH",
@@ -356,7 +377,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "BTC_ZEC":  {
+    "BTC_ZEC": {
         "name": "BTC-ZEC",
         "base": "BTC",
         "quote": "ZEC",
@@ -366,7 +387,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.01'),
     },
-    "BTC_XLM":  {
+    "BTC_XLM": {
         "name": "BTC-XLM",
         "base": "BTC",
         "quote": "XLM",
@@ -436,9 +457,9 @@ Bittrex = {
         "minQty": Decimal('50'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
+    },
 
-    "ETH_ETC":  {
+    "ETH_ETC": {
         "name": "ETH-ETC",
         "base": "ETC",
         "quote": "ETC",
@@ -448,7 +469,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LTC":  {
+    "ETH_LTC": {
         "name": "ETH-LTC",
         "base": "ETC",
         "quote": "LTC",
@@ -458,7 +479,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_OMG":  {
+    "ETH_OMG": {
         "name": "ETH-OMG",
         "base": "ETC",
         "quote": "OMG",
@@ -468,7 +489,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.0001'),
     },
-    "ETH_GNT":  {
+    "ETH_GNT": {
         "name": "ETH-GNT",
         "base": "ETC",
         "quote": "GNT",
@@ -478,7 +499,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LSK":  {
+    "ETH_LSK": {
         "name": "ETH-LSK",
         "base": "ETH",
         "quote": "LSK",
@@ -488,7 +509,7 @@ Bittrex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "ETH_ZRX":  {
+    "ETH_ZRX": {
         "name": "ETH_ZRX",
         "base": "ETH",
         "quote": "ZRX",
@@ -497,8 +518,8 @@ Bittrex = {
         "minQty": Decimal('0.15'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
-    "BTC_OMG":  {
+    },
+    "BTC_OMG": {
         "name": "BTC-OMG",
         "base": "BTC",
         "quote": "OMG",
@@ -510,7 +531,7 @@ Bittrex = {
     },
 
 
-    "USD_BTC":  {
+    "USD_BTC": {
         "name": "USDT-BTC",
         "base": "USDT",
         "quote": "BTC",
@@ -520,7 +541,7 @@ Bittrex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ETH":  {
+    "USD_ETH": {
         "name": "USDT-ETH",
         "base": "USDT",
         "quote": "ETH",
@@ -530,7 +551,7 @@ Bittrex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ZEC":  {
+    "USD_ZEC": {
         "name": "USDT-ZEC",
         "base": "USDT",
         "quote": "ZEC",
@@ -540,7 +561,7 @@ Bittrex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_DASH":  {
+    "USD_DASH": {
         "name": "USDT-DASH",
         "base": "USDT",
         "quote": "DASH",
@@ -551,7 +572,7 @@ Bittrex = {
     },
 
 
-    "USD_LTC":  {
+    "USD_LTC": {
         "name": "USDT-LTC",
         "base": "USDT",
         "quote": "LTC",
@@ -561,7 +582,7 @@ Bittrex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_XMR":  {
+    "USD_XMR": {
         "name": "USDT-XMR",
         "base": "USDT",
         "quote": "XMR",
@@ -571,7 +592,7 @@ Bittrex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ETC":  {
+    "USD_ETC": {
         "name": "USDT-ETC",
         "base": "USDT",
         "quote": "ETC",
@@ -584,7 +605,7 @@ Bittrex = {
 }
 
 Cex = {
-    "BTC_XRP":  {
+    "BTC_XRP": {
         "name": "XRP/BTC",
         "base": "BTC",
         "quote": "XRP",
@@ -593,7 +614,7 @@ Cex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "BTC_ETH":  {
+    "BTC_ETH": {
         "name": "ETH/BTC",
         "base": "BTC",
         "quote": "ETH",
@@ -611,7 +632,7 @@ Cex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "BTC_ZEC":  {
+    "BTC_ZEC": {
         "name": "ZEC/BTC",
         "base": "BTC",
         "quote": "ZEC",
@@ -620,7 +641,7 @@ Cex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.01'),
     },
-    "BTC_XLM":  {
+    "BTC_XLM": {
         "name": "XLM/BTC",
         "base": "BTC",
         "quote": "XLM",
@@ -629,20 +650,20 @@ Cex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    
+
 }
 
 Poloniex = {
-   "BTC_ZRX": {
+    "BTC_ZRX": {
         "name": "BTC_ZRX",
         "base": "BTC",
         "quote": "ZRX",
         "minType": "ccxt",
         "minVal": Decimal('0.001'),
-        #"minQty": Decimal('0.02'),
+        # "minQty": Decimal('0.02'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
+    },
 
     "BTC_SC": {
         "name": "BTC_SC",
@@ -650,11 +671,11 @@ Poloniex = {
         "quote": "SC",
         "minType": "ccxt",
         "minVal": Decimal('0.001'),
-        #"minQty": Decimal('1'),
+        # "minQty": Decimal('1'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
-   "BTC_REP": {
+    },
+    "BTC_REP": {
         "name": "BTC_REP",
         "base": "BTC",
         "quote": "REP",
@@ -663,7 +684,7 @@ Poloniex = {
         "minQty": Decimal('0.02'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
+    },
     "BTC_RDD": {
         "name": "BTC_RDD",
         "base": "BTC",
@@ -673,8 +694,8 @@ Poloniex = {
         "minQty": Decimal('100'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
-},
-    "BTC_XRP":  {
+    },
+    "BTC_XRP": {
         "name": "BTC_XRP",
         "base": "BTC",
         "quote": "XRP",
@@ -683,7 +704,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "BTC_ETH":  {
+    "BTC_ETH": {
         "name": "BTC_ETH",
         "base": "BTC",
         "quote": "ETH",
@@ -701,7 +722,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.0001'),
     },
-    "BTC_ZEC":  {
+    "BTC_ZEC": {
         "name": "BTC_ZEC",
         "base": "BTC",
         "quote": "ZEC",
@@ -710,7 +731,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.01'),
     },
-    "BTC_XLM":  {
+    "BTC_XLM": {
         "name": "BTC_STR",
         "base": "BTC",
         "quote": "XLM",
@@ -767,7 +788,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_ETC":  {
+    "ETH_ETC": {
         "name": "ETH_ETC",
         "base": "ETC",
         "quote": "ETC",
@@ -776,7 +797,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LTC":  {
+    "ETH_LTC": {
         "name": "ETH_LTC",
         "base": "ETC",
         "quote": "LTC",
@@ -785,7 +806,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_OMG":  {
+    "ETH_OMG": {
         "name": "ETH_OMG",
         "base": "ETC",
         "quote": "OMG",
@@ -794,7 +815,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_GNT":  {
+    "ETH_GNT": {
         "name": "ETH_GNT",
         "base": "ETC",
         "quote": "GNT",
@@ -803,7 +824,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LSK":  {
+    "ETH_LSK": {
         "name": "ETH_LSK",
         "base": "ETH",
         "quote": "LSK",
@@ -813,7 +834,7 @@ Poloniex = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "ETH_ZRX":  {
+    "ETH_ZRX": {
         "name": "ETH_ZRX",
         "base": "ETH",
         "quote": "ZRX",
@@ -822,9 +843,9 @@ Poloniex = {
         "minQty": Decimal('0.15'),
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
+    },
 
-    "BTC_OMG":  {
+    "BTC_OMG": {
         "name": "BTC-OMG",
         "base": "BTC",
         "quote": "OMG",
@@ -834,7 +855,7 @@ Poloniex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_BTC":  {
+    "USD_BTC": {
         "name": "USDT_BTC",
         "base": "USDT",
         "quote": "BTC",
@@ -844,7 +865,7 @@ Poloniex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ETH":  {
+    "USD_ETH": {
         "name": "USDT_ETH",
         "base": "USDT",
         "quote": "ETH",
@@ -854,7 +875,7 @@ Poloniex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ZEC":  {
+    "USD_ZEC": {
         "name": "USDT_ZEC",
         "base": "USDT",
         "quote": "ZEC",
@@ -864,7 +885,7 @@ Poloniex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_DASH":  {
+    "USD_DASH": {
         "name": "USDT_DASH",
         "base": "USDT",
         "quote": "DASH",
@@ -875,7 +896,7 @@ Poloniex = {
     },
 
 
-    "USD_LTC":  {
+    "USD_LTC": {
         "name": "USDT_LTC",
         "base": "USDT",
         "quote": "LTC",
@@ -885,7 +906,7 @@ Poloniex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_XMR":  {
+    "USD_XMR": {
         "name": "USDT_XMR",
         "base": "USDT",
         "quote": "XMR",
@@ -895,7 +916,7 @@ Poloniex = {
         "qtyPrecision": Decimal('1'),
     },
 
-    "USD_ETC":  {
+    "USD_ETC": {
         "name": "USDT_ETC",
         "base": "USDT",
         "quote": "ETC",
@@ -920,7 +941,7 @@ Binance = {
         "minType": "ccxt",
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
+    },
     "BTC_RDD": {
         "name": "BTC-RDD",
         "base": "BTC",
@@ -929,7 +950,7 @@ Binance = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
 
-},
+    },
     "BTC_ZRX": {
         "name": "BTC-ZRX",
         "base": "BTC",
@@ -937,9 +958,9 @@ Binance = {
         "minType": "ccxt",
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
+    },
 
-    "BTC_XRP":  {
+    "BTC_XRP": {
         "name": "BTC-XRP",
         "base": "BTC",
         "quote": "XRP",
@@ -947,7 +968,7 @@ Binance = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "BTC_ETH":  {
+    "BTC_ETH": {
         "name": "BTC-ETH",
         "base": "BTC",
         "quote": "ETH",
@@ -963,7 +984,7 @@ Binance = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "BTC_ZEC":  {
+    "BTC_ZEC": {
         "name": "BTC-ZEC",
         "base": "BTC",
         "quote": "ZEC",
@@ -971,7 +992,7 @@ Binance = {
         "pricePrecision": Decimal('0.000001'),
         "qtyPrecision": Decimal('0.01'),
     },
-    "BTC_XLM":  {
+    "BTC_XLM": {
         "name": "BTC-XLM",
         "base": "BTC",
         "quote": "XLM",
@@ -1027,9 +1048,9 @@ Binance = {
         "minType": "ccxt",
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.01'),
-},
+    },
 
-    "ETH_ETC":  {
+    "ETH_ETC": {
         "name": "ETH-ETC",
         "base": "ETC",
         "quote": "ETC",
@@ -1037,7 +1058,7 @@ Binance = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LTC":  {
+    "ETH_LTC": {
         "name": "ETH-LTC",
         "base": "ETC",
         "quote": "LTC",
@@ -1045,7 +1066,7 @@ Binance = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_OMG":  {
+    "ETH_OMG": {
         "name": "ETH-OMG",
         "base": "ETC",
         "quote": "OMG",
@@ -1053,7 +1074,7 @@ Binance = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.0001'),
     },
-    "ETH_GNT":  {
+    "ETH_GNT": {
         "name": "ETH-GNT",
         "base": "ETC",
         "quote": "GNT",
@@ -1061,7 +1082,7 @@ Binance = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('1'),
     },
-    "ETH_LSK":  {
+    "ETH_LSK": {
         "name": "ETH-LSK",
         "base": "ETH",
         "quote": "LSK",
@@ -1069,15 +1090,15 @@ Binance = {
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
     },
-    "ETH_ZRX":  {
+    "ETH_ZRX": {
         "name": "ETH_ZRX",
         "base": "ETH",
         "quote": "ZRX",
         "minType": "ccxt",
         "pricePrecision": Decimal('0.00000001'),
         "qtyPrecision": Decimal('0.001'),
-},
-    "BTC_OMG":  {
+    },
+    "BTC_OMG": {
         "name": "BTC-OMG",
         "base": "BTC",
         "quote": "OMG",
@@ -1088,6 +1109,3 @@ Binance = {
 
 
 }
-
-
-

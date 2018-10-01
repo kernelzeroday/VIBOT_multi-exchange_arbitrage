@@ -17,11 +17,11 @@ bittrexSecret = 'e2f700b383b54058800f769b0d96e9ec'
 binanceKey = 'vURW3wM0yC7vD4RwAZIEFbMsDND5SIXIj0lGWhcv4RlNVlXtk0EVV3bSq9xrC8Jh'
 binanceSecret = 'r0XkzQBMC6xHXTz7IE9DF9yHmwqWBsuul3lJlX6TfT8YCqqYViItBSdtEkBdZ539'
 
-mq_host='167.114.128.139'
-mq_port=1883
-mq_user='vibot'
-mq_pass='NmQ5Nj_3MrAwiNDu'
+mq_host = '167.114.128.139'
+mq_port = 1883
+mq_user = 'vibot'
+mq_pass = 'NmQ5Nj_3MrAwiNDu'
 mq_keepalive = 60
 mq_bindAddress = ""
 
-interval=int(3)
+interval = int(3)

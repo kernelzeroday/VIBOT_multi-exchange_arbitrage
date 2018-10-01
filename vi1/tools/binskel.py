@@ -8,7 +8,7 @@ This is a skeleton for writing API wrappers for exchange.
 
 """
 
-# 
+#
 import sys
 import json
 import argparse
@@ -27,7 +27,10 @@ api = Client(api_key, api_secret)
 # local libs
 # import <api>
 # Log Formatter
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG, filename='tool.log')
+logging.basicConfig(
+    format='%(levelname)s:%(message)s',
+    level=logging.DEBUG,
+    filename='tool.log')
 
 """
 API Tool Skeleton
@@ -35,15 +38,15 @@ API Tool Skeleton
 """
 key = ''
 secret = ''
-withdrawal_enabled=True
+withdrawal_enabled = True
+
 
 def timeStamp():
-     return time.time()
+    return time.time()
+
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
-
-
 
 
 try:
@@ -52,48 +55,210 @@ try:
 except ImportError:
     # Fallback to Python 2.7
     from ConfigParser import ConfigParser, NoSectionError
+
+
 def main(argv):
     # Setup Argument Parser
     parser = argparse.ArgumentParser(description='Exchange API Tool Skeleton')
     # functions
-    parser.add_argument('-f', '--config', default='./tool.cfg', type=str, required=False, help='config .cfg file')
-    parser.add_argument('-t', '--ticker', default=False, action='store_true', required=False, help='Get ticker information for pai , specify with -p (example: BTC-ETH)')
-    parser.add_argument('-d', '--deposit_address', action='store_true', default=False, required=False, help='Get deposit addresses for currency (specify with -c)')
-    parser.add_argument('-V', '--verbose', action='store_true', default=False, required=False, help='Enable extra verbose messages for debugging')
-    #getdeposithistory
-    parser.add_argument('-D', '--deposit_history', action='store_true', default=False, required=False, help='Return acct deposit history')
-    parser.add_argument('-B', '--balances', default=False, action='store_true', required=False, help='Get all available balances')
-    parser.add_argument('-k', '--balance', default=False, action='store_true', required=False, help='Get a particular account balance (specifiy with -c)')
-    parser.add_argument('-b', '--buy_limit', default=False, action='store_true', required=False, help='Buy Limit Order ')
-    parser.add_argument('-s', '--sell_limit', default=False, action='store_true', required=False, help='Sell Limit Order')
-    parser.add_argument('-C', '--cancel_order', default=False, action='store_true' ,required=False, help="Cancel an order")
-    parser.add_argument('-m', '--buy_market', default=False, action='store_true' ,required=False, help='Buy at market price')
-    parser.add_argument('-S', '--sell_market', default=False, action='store_true' ,required=False, help='Sell at market price')
-    parser.add_argument('-W', '--withdraw', default=False, action='store_true', required=False, help="DANGEROUS: Withdraw (specify currency <-c>, amount <-a>, and address <-A>)")
-    parser.add_argument('-w', '--withdrawal_history', default=False, action='store_true', required=False, help='Get withdrawl history (specify currency <-c> , and optionally count <-x>) ')
-    parser.add_argument('-O', '--open_orders', default=False, action='store_true', required=False, help='Get open orders for pair (specify with -p)')
-    parser.add_argument('-o', '--order_book', default=False, action='store_true', required=False, help='Retreive order book for pair')
-    parser.add_argument('-T', '--order_type', default='both', type=str, required=False, help='Specify "buy", "sell", or "both"')
-    parser.add_argument('-I', '--currencies',  default=False, action='store_true', required=False, help='Return a list of supported currency information')
-    parser.add_argument('-H', '--order_history', default=False, action='store_true', required=False, help='Return your order history')
+    parser.add_argument(
+        '-f',
+        '--config',
+        default='./tool.cfg',
+        type=str,
+        required=False,
+        help='config .cfg file')
+    parser.add_argument(
+        '-t',
+        '--ticker',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Get ticker information for pai , specify with -p (example: BTC-ETH)')
+    parser.add_argument(
+        '-d',
+        '--deposit_address',
+        action='store_true',
+        default=False,
+        required=False,
+        help='Get deposit addresses for currency (specify with -c)')
+    parser.add_argument(
+        '-V',
+        '--verbose',
+        action='store_true',
+        default=False,
+        required=False,
+        help='Enable extra verbose messages for debugging')
+    # getdeposithistory
+    parser.add_argument(
+        '-D',
+        '--deposit_history',
+        action='store_true',
+        default=False,
+        required=False,
+        help='Return acct deposit history')
+    parser.add_argument(
+        '-B',
+        '--balances',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Get all available balances')
+    parser.add_argument(
+        '-k',
+        '--balance',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Get a particular account balance (specifiy with -c)')
+    parser.add_argument(
+        '-b',
+        '--buy_limit',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Buy Limit Order ')
+    parser.add_argument(
+        '-s',
+        '--sell_limit',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Sell Limit Order')
+    parser.add_argument(
+        '-C',
+        '--cancel_order',
+        default=False,
+        action='store_true',
+        required=False,
+        help="Cancel an order")
+    parser.add_argument(
+        '-m',
+        '--buy_market',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Buy at market price')
+    parser.add_argument(
+        '-S',
+        '--sell_market',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Sell at market price')
+    parser.add_argument(
+        '-W',
+        '--withdraw',
+        default=False,
+        action='store_true',
+        required=False,
+        help="DANGEROUS: Withdraw (specify currency <-c>, amount <-a>, and address <-A>)")
+    parser.add_argument(
+        '-w',
+        '--withdrawal_history',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Get withdrawl history (specify currency <-c> , and optionally count <-x>) ')
+    parser.add_argument(
+        '-O',
+        '--open_orders',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Get open orders for pair (specify with -p)')
+    parser.add_argument(
+        '-o',
+        '--order_book',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Retreive order book for pair')
+    parser.add_argument(
+        '-T',
+        '--order_type',
+        default='both',
+        type=str,
+        required=False,
+        help='Specify "buy", "sell", or "both"')
+    parser.add_argument(
+        '-I',
+        '--currencies',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Return a list of supported currency information')
+    parser.add_argument(
+        '-H',
+        '--order_history',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Return your order history')
     # getorder
-    parser.add_argument('-q', '--order_status_query', default=False, action='store_true', required=False, help='Query an order by uuid for status')
-
+    parser.add_argument(
+        '-q',
+        '--order_status_query',
+        default=False,
+        action='store_true',
+        required=False,
+        help='Query an order by uuid for status')
 
     # arguments to functions
-    #str
-    
-    parser.add_argument('-c', '--currency', default='null', type=str, required=False, help='Specify a currency (example: BTC)')
-    parser.add_argument('-p', '--pair', default='null', type=str, required=False, help='Specify a currency pair (example: BTC_ETH)')
-    parser.add_argument('-i', '--order_id', type=str, default='null',required=False, help="Specify an order id")
-    parser.add_argument('-A', '--address', type=str, default='null', required=False, help="Specify a crypto wallet address for withdrawal (example: 15isHXhXV85i7QFwwwed9gg9ET5mWjNppP")
-    
+    # str
+
+    parser.add_argument(
+        '-c',
+        '--currency',
+        default='null',
+        type=str,
+        required=False,
+        help='Specify a currency (example: BTC)')
+    parser.add_argument(
+        '-p',
+        '--pair',
+        default='null',
+        type=str,
+        required=False,
+        help='Specify a currency pair (example: BTC_ETH)')
+    parser.add_argument(
+        '-i',
+        '--order_id',
+        type=str,
+        default='null',
+        required=False,
+        help="Specify an order id")
+    parser.add_argument(
+        '-A',
+        '--address',
+        type=str,
+        default='null',
+        required=False,
+        help="Specify a crypto wallet address for withdrawal (example: 15isHXhXV85i7QFwwwed9gg9ET5mWjNppP")
+
     # int
-    parser.add_argument('-x', '--count', default=20, type=int, required=False, help='Specify a count <for depth>')
-    #float
-    parser.add_argument('-a', '--amount', default='0.0', type=float, required=False, help='Specify an amount to buy, sell, withdraw, etc')
-    parser.add_argument('-P', '--price', default='0.0', type=float , required=False, help="Price to buy or sell at")
-    
+    parser.add_argument(
+        '-x',
+        '--count',
+        default=20,
+        type=int,
+        required=False,
+        help='Specify a count <for depth>')
+    # float
+    parser.add_argument(
+        '-a',
+        '--amount',
+        default='0.0',
+        type=float,
+        required=False,
+        help='Specify an amount to buy, sell, withdraw, etc')
+    parser.add_argument(
+        '-P',
+        '--price',
+        default='0.0',
+        type=float,
+        required=False,
+        help="Price to buy or sell at")
 
     args = parser.parse_args()
     config = ConfigParser()
@@ -123,7 +288,7 @@ def main(argv):
     amount = args.amount
     price = args.price
     debug = args.verbose
-    """ Configuation Parser. Create a .cfg file with 
+    """ Configuation Parser. Create a .cfg file with
         the following fields:
         [keys]
         exchangeKey = ''
@@ -151,10 +316,10 @@ def main(argv):
     #        eprint('Failed to create and/or write to {}'.format(args.config))
     #    # do stuff here
     #    api = exchange.Client(key, secret) # init some API lib
-    #    
+    #
     #    tS = timeStamp()
     #    logging.debug("Program started at %s" % tS)
-        
+
     def get_ticker(pair):
         pair = str(pair)
         if pair == 'null':
@@ -164,7 +329,7 @@ def main(argv):
             t = api.get_recent_trades(symbol=pair)
         except Exception as err:
             logging.error(err)
-            eprint('Error getting ticker data: '+str(err))
+            eprint('Error getting ticker data: ' + str(err))
             return False
         else:
             tt = json.dumps(t)
@@ -174,8 +339,8 @@ def main(argv):
                 return(tt)
             except Exception as err:
                 eprint(err)
-                #return(tt)
-        
+                # return(tt)
+
     def get_deposit_address(currency):
         if currency == 'null':
             eprint('WARN: No currency specified, defaulting to BTC')
@@ -184,18 +349,18 @@ def main(argv):
             add = api.get_deposit_address(asset=currency)
         except Exception as err:
             logging.error(err)
-            eprint("Error getting deposit address: "+ str(err))
+            eprint("Error getting deposit address: " + str(err))
             return False
         else:
             add_ = json.dumps(add)
             return add_
-        
+
     def get_balances():
-        
+
         try:
             prebals = api.get_account()['balances']
             bals = {}
-            for i in range (0, len (prebals)):
+            for i in range(0, len(prebals)):
                 bals[prebals[i]['asset']] = {}
                 bals[prebals[i]['asset']]['available'] = prebals[i]['free']
                 bals[prebals[i]['asset']]['pending'] = prebals[i]['locked']
@@ -206,7 +371,7 @@ def main(argv):
         else:
             bals = json.dumps(bals)
             return bals
-        
+
     def get_balance(currency):
         if currency == 'null':
             eprint('WARN: No currency specified, defaulting to BTC')
@@ -221,7 +386,7 @@ def main(argv):
             bal = json.dumps(bal)
             return bal
 
-    def get_order_book(pair,otype,depth=20):
+    def get_order_book(pair, otype, depth=20):
         pair = str(pair)
         otype = str(otype)
         depth = int(depth)
@@ -229,12 +394,12 @@ def main(argv):
             ret = api.get_order_book(symbol=pair)
         except Exception as err:
             eprint("Error getting orderbook")
-            logging.info("Error getting orderbook: "+ str(err))
+            logging.info("Error getting orderbook: " + str(err))
         else:
             ret = json.dumps(ret)
-            
+
             return ret
-    
+
     def buy_limit_order(pair, amount, price):
         if pair == 'null':
             eprint('Specify a pair with -p')
@@ -246,10 +411,11 @@ def main(argv):
             eprint('Specify a price with -P')
             return False
         try:
-            ret = api.order_limit_buy(symbol=pair, quantity=amount, price=price)
+            ret = api.order_limit_buy(
+                symbol=pair, quantity=amount, price=price)
         except Exception as err:
             logging.info(err)
-            eprint('Error placing buy limit order: '+ str(err))
+            eprint('Error placing buy limit order: ' + str(err))
             return False
         else:
             ret = json.dumps(ret)
@@ -266,17 +432,18 @@ def main(argv):
             eprint('Specify a price with -P')
             return False
         try:
-            ret = api.order_limit_sell(symbol=pair, quantity=amount, price=price)
+            ret = api.order_limit_sell(
+                symbol=pair, quantity=amount, price=price)
         except Exception as err:
             logging.info(err)
-            eprint('Error placing sell limit order: '+ str(err))
+            eprint('Error placing sell limit order: ' + str(err))
             return False
         else:
             ret = json.dumps(ret)
             return(ret)
 
     def buy_market_order(pair, amount):
-    #
+        #
         #
         if pair == 'null':
             eprint('Specify a pair with -p')
@@ -285,28 +452,7 @@ def main(argv):
             eprint('Specify an amount with -a')
             return False
         try:
-            ret = api.order_market_buy(symbol=pair,quantity=amount)
-        except Exception as err:
-           eprint(err)
-           logging.info(err)
-        else:
-           try:
-               ret = json.dumps(ret)
-           except Exception as err:
-               logging.info(err)
-           else:
-               return(ret)
-
-
-    def sell_market_order(pair, amount):
-        if pair == 'null':
-            eprint('Specify a pair with -p')
-            return False
-        if amount == '0.0':
-            eprint('Specify an amount with -a')
-            return False
-        try:
-            ret = api.order_market_sell(symbol=pair,quantity=amount)
+            ret = api.order_market_buy(symbol=pair, quantity=amount)
         except Exception as err:
             eprint(err)
             logging.info(err)
@@ -318,7 +464,25 @@ def main(argv):
             else:
                 return(ret)
 
-
+    def sell_market_order(pair, amount):
+        if pair == 'null':
+            eprint('Specify a pair with -p')
+            return False
+        if amount == '0.0':
+            eprint('Specify an amount with -a')
+            return False
+        try:
+            ret = api.order_market_sell(symbol=pair, quantity=amount)
+        except Exception as err:
+            eprint(err)
+            logging.info(err)
+        else:
+            try:
+                ret = json.dumps(ret)
+            except Exception as err:
+                logging.info(err)
+            else:
+                return(ret)
 
     def cancel(order_id, pair):
         if order_id == 'null':
@@ -328,7 +492,7 @@ def main(argv):
             ret = api.cancel_order(orderId=order_id, symbol=pair)
         except Exception as err:
             logging.info(err)
-            eprint('Error canceling order: '+ str(err))
+            eprint('Error canceling order: ' + str(err))
             return False
         else:
             ret = json.dumps(ret)
@@ -345,13 +509,16 @@ def main(argv):
             eprint('Specify an address with -A !')
             return False
         print('Please review the following information carefully!')
-        print('Currency: ' +str(currency))
+        print('Currency: ' + str(currency))
         print('Address: ' + str(address))
         print('Amount: ' + str(amount))
         do_it = input("Proceed? (YES/NO) :")
         if do_it == 'YES':
             try:
-                ret = api.withdraw(asset=currency, address=address, amount=amount)
+                ret = api.withdraw(
+                    asset=currency,
+                    address=address,
+                    amount=amount)
             except Exception as err:
                 logging.error(err)
                 eprint('Error withdrawing currency: ' + str(err))
@@ -376,10 +543,10 @@ def main(argv):
         else:
             ret = json.dumps(ret)
             return(ret)
-        
+
     def get_orders(pair):
         if pair == 'null':
-            pair=''
+            pair = ''
         try:
             ret = api.get_open_orders(symbol=pair)
         except Exception as err:
@@ -394,29 +561,30 @@ def main(argv):
             ret = api.getcurrencies()
         except Exception as err:
             logging.info(err)
-            eprint('Error getting currency data'+ str(err))
+            eprint('Error getting currency data' + str(err))
         else:
             ret = json.dumps(ret)
             print(ret)
 
-    def deposithistory(currency,count=10):
+    def deposithistory(currency, count=10):
 
         if currency == 'null':
-            currency=''
-        
+            currency = ''
+
         try:
             ret = api.get_deposit_history(asset=currency)
         except Exception as err:
             logging.info(err)
-            eprint('Error getting deposit history' +str(err))
+            eprint('Error getting deposit history' + str(err))
         else:
             ret = json.dumps(ret)
             print(ret)
 
-    def orderHist(pair,count=10):
-        if pair == 'null' : pair=''
+    def orderHist(pair, count=10):
+        if pair == 'null':
+            pair = ''
         try:
-            ret = api.get_all_orders(symbol=pair,limit=count)
+            ret = api.get_all_orders(symbol=pair, limit=count)
         except Exception as err:
             logging.info(err)
         else:
@@ -428,123 +596,126 @@ def main(argv):
             eprint('Specify an order id (uuid) with -i')
             return False
         else:
-           try:
-              ret = api.get_order(symbol=pair, orderId=order_id)
-           except Exception as err:
-              eprint('Error getting order history: ' + str(err))
-              return False
-           else:
-              ret = json.dumps(ret)
-              return(ret)
+            try:
+                ret = api.get_order(symbol=pair, orderId=order_id)
+            except Exception as err:
+                eprint('Error getting order history: ' + str(err))
+                return False
+            else:
+                ret = json.dumps(ret)
+                return(ret)
     """ Program Flow """
 
-
-
-
     if ticker:
-            if debug:
-                    print('Ticker call.')
-            ret = get_ticker(pair)
-            print(ret)
-                
+        if debug:
+            print('Ticker call.')
+        ret = get_ticker(pair)
+        print(ret)
+
     if deposit_address:
-            if debug:
-                    print('Deposit address call')
-            ret = get_deposit_address(currency)
-            print(ret)
+        if debug:
+            print('Deposit address call')
+        ret = get_deposit_address(currency)
+        print(ret)
     if balances:
-            if debug:
-                    print('Get all balances call')
-            ret = get_balances()
-            print(ret)
+        if debug:
+            print('Get all balances call')
+        ret = get_balances()
+        print(ret)
 
     if balance:
-            if debug:
-                    print('Get balance call')
-            ret = get_balance(currency)
-            print(ret)
-                
+        if debug:
+            print('Get balance call')
+        ret = get_balance(currency)
+        print(ret)
 
     if buy_limit:
-            if debug:
-                    print('Buy limit call')
-            ret = buy_limit_order(pair, amount, price)
-            print(ret)
+        if debug:
+            print('Buy limit call')
+        ret = buy_limit_order(pair, amount, price)
+        print(ret)
     if sell_limit:
-            if debug:
-                    print('Sell limit call')
-            ret = sell_limit_order(pair, amount, price)
-            print(ret)
+        if debug:
+            print('Sell limit call')
+        ret = sell_limit_order(pair, amount, price)
+        print(ret)
 
     if buy_market:
-            if debug: print('Buy Market call')
-            ret = buy_market_order(pair,amount)
-            print(ret)
+        if debug:
+            print('Buy Market call')
+        ret = buy_market_order(pair, amount)
+        print(ret)
 
     if sell_market:
-            if debug:
-                ret = sell_market_order(pair,amount)
-                print(ret)
+        if debug:
+            ret = sell_market_order(pair, amount)
+            print(ret)
 
     if cancel_order:
-            if debug:
-                    print('Cancel order call')
-            ret = cancel(order_id,pair)
-            print(ret)
-            
+        if debug:
+            print('Cancel order call')
+        ret = cancel(order_id, pair)
+        print(ret)
+
     if withdraw and withdrawal_enabled:
-            if debug:
-                    print('Withdrawal call')
-            ret = do_withdraw(currency, amount, address)
-            print(ret)
+        if debug:
+            print('Withdrawal call')
+        ret = do_withdraw(currency, amount, address)
+        print(ret)
     elif withdraw and not withdrawal_enabled:
-            eprint('Withdrawal disabled. Quitting.')
-            sys.exit(0)
-            
+        eprint('Withdrawal disabled. Quitting.')
+        sys.exit(0)
+
     if withdrawal_history:
-            if debug:
-                    print('Withdrawal history call')
-            ret = wd_history(currency, count)
-            print(ret)
+        if debug:
+            print('Withdrawal history call')
+        ret = wd_history(currency, count)
+        print(ret)
     if orders:
-             if debug:
-                    print('Orders call')
-             ret = get_orders(pair)
-             print(ret)
+        if debug:
+            print('Orders call')
+        ret = get_orders(pair)
+        print(ret)
 
     if currencies:
-        if debug: print('Currencies call')
+        if debug:
+            print('Currencies call')
         ret = getcurrencies()
         print(ret)
-    
+
     if deposit_history:
-        if debug: print('Deposit history call')
+        if debug:
+            print('Deposit history call')
         ret = deposithistory(currency, count)
         print(ret)
 
     if order_history:
-        if debug: print('Order history call')
+        if debug:
+            print('Order history call')
         ret = orderHist(pair)
         print(ret)
     if order_book:
-        if debug: print('Orderbook call')
+        if debug:
+            print('Orderbook call')
         depth = int(count)
         otype = str(order_type)
-        ret = get_order_book(pair,otype,depth)
+        ret = get_order_book(pair, otype, depth)
 #        ret = json.loads(ret)
-        
-        #for i in ret['both'][0:20]:
+
+        # for i in ret['both'][0:20]:
         #    print(i)
         print(ret)
 
     if order_status_query:
-        if debug: print('Order status query call')
+        if debug:
+            print('Order status query call')
         if not order_id:
             eprint('Specify a uuid with -i')
             sys.exit(1)
         else:
             ret = query_order(order_id)
             print(ret)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

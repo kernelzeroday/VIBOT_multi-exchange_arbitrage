@@ -10,18 +10,25 @@ import config
 topic = "cbal2"
 client = mqtt.Client(topic + "client", clean_session=False)
 client.username_pw_set(config.mq_user, config.mq_pass)
-client.connect(config.mq_host, port=config.mq_port,
-               keepalive=config.mq_keepalive, bind_address=config.mq_bindAddress)
+client.connect(
+    config.mq_host,
+    port=config.mq_port,
+    keepalive=config.mq_keepalive,
+    bind_address=config.mq_bindAddress)
 client.loop_start()
 
 
 cex = CexAPI.Api(config.cexUser, config.cexKey, config.cexSecret)
 # CEX
-while 1:
+while True:
     result = {}
     cprice = {}
     try:
-        cvals = requests.post("https://cex.io/api/last_prices/BTC", data=None, headers={'User-agent': 'bot-cex.io-' + cex.username }).json()
+        cvals = requests.post(
+            "https://cex.io/api/last_prices/BTC",
+            data=None,
+            headers={
+                'User-agent': 'bot-cex.io-' + cex.username}).json()
         for val in cvals.get("data", []):
             key = val.get("symbol1", False)
             if key:
@@ -33,7 +40,8 @@ while 1:
             if isinstance(val, dict):
                 available = float(val.get("available", "0.0"))
                 pending = float(val.get("orders", "0.0"))
-                value = (available + pending) if key == "BTC" else (available + pending) * cprice.get(key, 0.0)
+                value = (available + pending) if key == "BTC" else (available +
+                                                                    pending) * cprice.get(key, 0.0)
 
                 result[key] = {
                     "available": available,
@@ -42,7 +50,6 @@ while 1:
                 }
         print(result)
         client.publish(topic, payload=json.dumps(result), qos=0, retain=False)
-    except:
+    except BaseException:
         pass
     time.sleep(config.interval)
-
