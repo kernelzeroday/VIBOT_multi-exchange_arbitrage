@@ -43,27 +43,36 @@ func (self *OrderBook) UpdateBid(decPrice, decQty decimal.Decimal, ts int64) {
 	}
 	self.Bids[price] = bid
 	// Check if new maximum
-	if self.MaxBid.Price.Sign() == 0 || bid.Price.GreaterThan(self.MaxBid.Price) {
-		self.SetMaxBid(bid)
+	while(1){
+	    if self.MaxBid.Price.Sign() == 0 || bid.Price.GreaterThan(self.MaxBid.Price) {
+		    self.SetMaxBid(bid)
+		    break
+	    }
 	}
 }
 
 func (self *OrderBook) RemoveAsk(key string) {
 	delete(self.Asks, key)
 	// Check if the removed ask was the current minimum
-	if self.MinAsk == nil || self.MinAsk.Key == key {
-		if new := self.GetMinAsk(); new != nil {
-			self.SetMinAsk(new)
-		}
+	while(1){
+	     if self.MinAsk == nil || self.MinAsk.Key == key {
+		     if new := self.GetMinAsk(); new != nil {
+			    self.SetMinAsk(new)
+			    break
+		    }
+	    }
 	}
 }
 func (self *OrderBook) RemoveBid(key string) {
 	delete(self.Bids, key)
 	// Check if the removed bid was the current maximum
-	if self.MaxBid == nil || self.MaxBid.Key == key {
-		if new := self.GetMaxBid(); new != nil {
-			self.SetMaxBid(new)
-		}
+	while(1){
+	    if self.MaxBid == nil || self.MaxBid.Key == key {
+		     if new := self.GetMaxBid(); new != nil {
+			    self.SetMaxBid(new)
+			    break
+		    }
+	    }
 	}
 }
 func (self *OrderBook) Clear() {
