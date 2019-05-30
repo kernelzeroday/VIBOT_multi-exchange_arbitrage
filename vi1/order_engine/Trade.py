@@ -874,7 +874,9 @@ class Cex(Exchange):
             return False
         else:
             orderID = res.get("id", False)
-            if not orderID:
+            try:
+                orderID
+            except NameError as e:
                 print("CEX Buy Order Placement Failed")
                 return False
             return super().buy(pair, price, qty, kind=kind, orderID=orderID)
@@ -890,7 +892,9 @@ class Cex(Exchange):
             return False
         else:
             orderID = res.get("id", False)
-            if not orderID:
+            try:
+                orderID
+            except NameError as e:
                 print("CEX Sell Order Placement Failed")
                 return False
             return super().sell(pair, price, qty, kind=kind, orderID=orderID)
@@ -977,7 +981,9 @@ class Poloniex(Exchange):
             return False
         else:
             orderID = res.get("orderNumber", False)
-            if not orderID:
+            try:
+                orderID
+            except NameError as e:
                 print("Poloniex Buy Order Placement Failed")
                 return False
             # Pass relevant info for tracking and logging via this method's
