@@ -1,6 +1,9 @@
 # Notice of publication of source code 2024
 
-Over 5 years have passed since this legacy codebase was last touched, and to my knowledge run in any capacity. I have decided to release this branch of one of the semi complete late stage development versions of this application as an educational resource for those wishing to learn about the concepts contained herein. 
+Over 5 years have passed since this legacy codebase was last touched, and to my knowledge run in any capacity. I have decided to release this branch of one of the semi complete late stage development versions of this application as an educational resource for those wishing to learn about the concepts contained herein.
+
+Please don't use this as anything other than a toy learning tool, or any of the code inside of it in any capacity, any particular branch or version of this code can have completely wrong math that has not been audited verified or tested in years or under any configurations.
+
 
 *Beware ye who enter, here be dragons.*
 
